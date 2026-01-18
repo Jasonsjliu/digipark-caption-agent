@@ -1,0 +1,155 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import type { GeneratedCaption } from '@/types';
+
+interface HistoryItem {
+    id: string;
+    created_at: string;
+    topic: string | null;
+    platform: 'tiktok' | 'instagram' | 'xiaohongshu';
+    caption: string;
+    tags: string[];
+    keywords_used: string[];
+    variables_used: Record<string, string>;
+}
+
+export function HistoryPanel() {
+    const [history, setHistory] = useState<HistoryItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [filter, setFilter] = useState<string>('all');
+    const [searchQuery, setSearchQuery] = useState('');
+    const supabase = createClient();
+
+    // Fetch history on mount
+    useEffect(() => {
+        fetchHistory();
+    }, []);
+
+    const fetchHistory = async () => {
+        setIsLoading(true);
+        const { data, error } = await supabase
+            .from('generation_history')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(100);
+
+        if (!error && data) {
+            setHistory(data as HistoryItem[]);
+        }
+        setIsLoading(false);
+    };
+
+    const deleteItem = async (id: string) => {
+        const { error } = await supabase
+            .from('generation_history')
+            .delete()
+            .eq('id', id);
+
+        if (!error) {
+            setHistory(history.filter(h => h.id !== id));
+        }
+    };
+
+    const formatTime = (isoString: string) => {
+        const date = new Date(isoString);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+        return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+    };
+
+    const platformIcon = {
+        tiktok: '🎵',
+        instagram: '📸',
+        xiaohongshu: '📕'
+    };
+
+    const filteredHistory = history.filter(item => {
+        if (filter !== 'all' && item.platform !== filter) return false;
+        if (searchQuery && !item.caption.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+        return true;
+    });
+
+    return (
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold text-white">Generation History</h2>
+                <button onClick={fetchHistory} className="text-xs text-gray-500 hover:text-white transition-colors">
+                    🔄 Refresh
+                </button>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-wrap gap-3 mb-6">
+                <input
+                    type="text"
+                    placeholder="Search captions..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 min-w-[200px] bg-white/5 border border-white/5 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-white/20"
+                />
+                <div className="flex bg-white/5 rounded-lg p-0.5 border border-white/5">
+                    {['all', 'tiktok', 'instagram', 'xiaohongshu'].map(p => (
+                        <button
+                            key={p}
+                            onClick={() => setFilter(p)}
+                            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${filter === p ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'}`}
+                        >
+                            {p === 'all' ? '📋 All' : `${platformIcon[p as keyof typeof platformIcon]} ${p.charAt(0).toUpperCase() + p.slice(1)}`}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* History List */}
+            {isLoading ? (
+                <div className="text-center py-8 text-gray-500">Loading...</div>
+            ) : filteredHistory.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 italic">
+                    {history.length === 0 ? 'No generation history yet.' : 'No results match your filter.'}
+                </div>
+            ) : (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                    {filteredHistory.map(item => (
+                        <div key={item.id} className="bg-white/5 rounded-xl p-4 border border-white/5 hover:border-white/10 transition-colors group">
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="text-lg">{platformIcon[item.platform]}</span>
+                                        <span className="text-[10px] text-gray-500 uppercase tracking-wider">{item.platform}</span>
+                                        <span className="text-[10px] text-gray-600">• {formatTime(item.created_at)}</span>
+                                    </div>
+                                    <p className="text-sm text-gray-300 line-clamp-2">{item.caption}</p>
+                                    {item.tags && item.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-2">
+                                            {item.tags.slice(0, 5).map((tag, i) => (
+                                                <span key={i} className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full">{tag}</span>
+                                            ))}
+                                            {item.tags.length > 5 && <span className="text-[10px] text-gray-500">+{item.tags.length - 5}</span>}
+                                        </div>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={() => deleteItem(item.id)}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400/50 hover:text-red-400 text-xs p-1"
+                                    title="Delete"
+                                >
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
