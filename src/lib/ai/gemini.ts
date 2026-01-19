@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { PRESETS, TIKTOK_TAG_CATEGORIES, getRandomOption } from '../presets';
+import { PRESETS, getRandomOption } from '../presets';
 import type { VariableSelections, GeneratedCaption, TikTokTags } from '@/types';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
@@ -115,11 +115,11 @@ ${Array.isArray(variables.trendElements) ? `- Trends: ${variables.trendElements.
 
 TAG REQUIREMENTS:
 Generate exactly 5 hashtags, one for each category:
-1. Audience Tag (target audience): e.g., ${TIKTOK_TAG_CATEGORIES.audience.examples.slice(0, 3).join(', ')}
-2. Vertical Tag (industry/niche): e.g., ${TIKTOK_TAG_CATEGORIES.vertical.examples.slice(0, 3).join(', ')}
-3. Result Tag (outcomes/benefits): e.g., ${TIKTOK_TAG_CATEGORIES.result.examples.slice(0, 3).join(', ')}
-4. Action Tag (call to action): e.g., ${TIKTOK_TAG_CATEGORIES.action.examples.slice(0, 3).join(', ')}
-5. Broad Traffic Tag (viral/trending): e.g., ${TIKTOK_TAG_CATEGORIES.broadTraffic.examples.slice(0, 3).join(', ')}
+1. Audience Tag (target audience)
+2. Vertical Tag (industry/niche)
+3. Result Tag (outcomes/benefits)
+4. Action Tag (call to action)
+5. Broad Traffic Tag (viral/trending)
 
 OUTPUT FORMAT (JSON only, no markdown):
 {

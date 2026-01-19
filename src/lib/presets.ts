@@ -201,27 +201,22 @@ export const TIKTOK_TAG_CATEGORIES = {
   audience: {
     label: 'Target Audience',
     labelEn: 'Audience Tag',
-    examples: ['#Digipark', '#SydneyMums', '#SydneyCouples', '#ArtLovers', '#TechGeeks'],
   },
   vertical: {
     label: 'Industry Vertical',
     labelEn: 'Vertical Tag',
-    examples: ['#ImmersiveArt', '#DigitalArt', '#SydneyEvents', '#ThingstodoinSydney', '#InteractiveExperience'],
   },
   result: {
     label: 'Outcome/Result',
     labelEn: 'Result Tag',
-    examples: ['#MindBlown', '#MustVisit', '#Viral', '#DateNight', '#FamilyDayOut'],
   },
   action: {
     label: 'Call to Action',
     labelEn: 'Action Tag',
-    examples: ['#BookNow', '#LinkInBio', '#SydneyLife', '#VisitSydney'],
   },
   broadTraffic: {
     label: 'Broad Reach',
     labelEn: 'Broad Traffic Tag',
-    examples: ['#FYP', '#ForYou', '#Sydney', '#Australia', '#Trending'],
   },
 } as const;
 
