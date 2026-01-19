@@ -5,16 +5,19 @@ import type { GenerationConfig } from '@/types';
 export async function POST(request: NextRequest) {
     try {
         const body: GenerationConfig = await request.json();
-        const { topic, keywordCount, variables, counts, specificKeywords, model } = body;
+        const { topic, keywordCount, variables, counts, specificKeywords, availableKeywords, model } = body;
 
         let selectedKeywords: string[] = [];
 
         if (specificKeywords && specificKeywords.length > 0) {
             // Use manually selected keywords
             selectedKeywords = specificKeywords;
+        } else if (availableKeywords && availableKeywords.length > 0) {
+            // Use user's keyword library for random selection
+            const shuffled = [...availableKeywords].sort(() => Math.random() - 0.5);
+            selectedKeywords = shuffled.slice(0, Math.min(keywordCount, shuffled.length));
         } else {
-            // For now, we'll use sample keywords if no database is connected
-            // Later this will fetch from Supabase
+            // Fallback to sample keywords if no user keywords available
             const sampleKeywords = [
                 'growth', 'success', 'productivity', 'marketing', 'business',
                 'digital', 'social media', 'content', 'strategy', 'engagement',

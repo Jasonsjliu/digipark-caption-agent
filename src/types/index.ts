@@ -55,6 +55,7 @@ export interface GenerationConfig {
     model?: ModelType;
     keywordCount: number;
     specificKeywords?: string[]; // For manual selection mode
+    availableKeywords?: string[]; // User's keyword library for random selection
     variables: VariableSelections;
     counts: {
         tiktok: number;

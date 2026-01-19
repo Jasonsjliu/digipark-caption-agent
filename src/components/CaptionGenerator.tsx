@@ -130,7 +130,8 @@ export function CaptionGenerator() {
                     model,
                     temperature: creativity / 100, intensity: toneIntensity,
                     keywordCount: randomKeywordCount,
-                    specificKeywords: isManualMode && activeKeywords.length > 0 ? activeKeywords : undefined
+                    availableKeywords: !isManualMode ? availableKeywords.map(k => k.keyword) : undefined,
+                    specificKeywords: isManualMode && activeKeywords.length > 0 ? activeKeywords.map(k => k.keyword) : undefined
                 }),
             });
             const data = await response.json();
