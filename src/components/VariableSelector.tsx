@@ -13,58 +13,58 @@ interface VariableSelectorProps {
 export function VariableSelector({ value, onChange }: VariableSelectorProps) {
 
     // Digipark-Native Groups
-    // User-Defined Groups (Bilingual / 中英对照)
+    // User-Defined Groups (English Only)
     const groups = [
         {
-            title: "Style & Tone 文案风格",
+            title: "Style & Tone",
             icon: <Sparkles className="w-3 h-3 text-purple-400" />,
             items: [
-                { key: 'tone', label: 'Tone 语气', icon: '🎭' },
-                { key: 'writingStyle', label: 'Style 风格', icon: '✍️' },
-                { key: 'perspective', label: 'POV 视角', icon: '👁️' },
-                { key: 'emotionalAppeal', label: 'Emotion 情感', icon: '❤️' },
-                { key: 'paces', label: 'Pace 节奏', icon: '⚡' },
-                { key: 'valueProposition', label: 'Value 价值', icon: '💎' },
+                { key: 'tone', label: 'Tone', icon: '🎭' },
+                { key: 'writingStyle', label: 'Style', icon: '✍️' },
+                { key: 'perspective', label: 'POV', icon: '👁️' },
+                { key: 'emotionalAppeal', label: 'Emotion', icon: '❤️' },
+                { key: 'paces', label: 'Pace', icon: '⚡' },
+                { key: 'valueProposition', label: 'Value', icon: '💎' },
             ]
         },
         {
-            title: "Hook Strategy 开头策略",
+            title: "Hook Strategy",
             icon: <Target className="w-3 h-3 text-red-400" />,
             items: [
-                { key: 'hookType', label: 'Hook 类型', icon: '🪝' },
-                { key: 'openingTemplate', label: 'Opener 模板', icon: '🚪' },
+                { key: 'hookType', label: 'Hook Type', icon: '🪝' },
+                { key: 'openingTemplate', label: 'Opener', icon: '🚪' },
             ]
         },
         {
-            title: "Content Angle 内容角度",
+            title: "Content Angle",
             icon: <Briefcase className="w-3 h-3 text-cyan-400" />,
             items: [
-                { key: 'contentFramework', label: 'Framework 框架', icon: '📝' },
-                { key: 'targetAudience', label: 'Audience 受众', icon: '👥' },
+                { key: 'contentFramework', label: 'Framework', icon: '📝' },
+                { key: 'targetAudience', label: 'Audience', icon: '👥' },
             ]
         },
         {
-            title: "Platform & Format 平台格式",
+            title: "Platform & Format",
             icon: <Layout className="w-3 h-3 text-pink-400" />,
             items: [
-                { key: 'captionLength', label: 'Length 长度', icon: '📏' },
-                { key: 'emojiStyle', label: 'Emoji 表情', icon: '😎' },
-                { key: 'paragraphStructure', label: 'Structure 结构', icon: '📑' },
+                { key: 'captionLength', label: 'Length', icon: '📏' },
+                { key: 'emojiStyle', label: 'Emoji', icon: '😎' },
+                { key: 'paragraphStructure', label: 'Structure', icon: '📑' },
             ]
         },
         {
-            title: "Call to Action 行动号召",
+            title: "Call to Action",
             icon: <Megaphone className="w-3 h-3 text-green-400" />,
             items: [
-                { key: 'ctaTone', label: 'CTA 语气', icon: '📢' },
+                { key: 'ctaTone', label: 'CTA Tone', icon: '📢' },
             ]
         },
         {
-            title: "Timing & Trends 时效趋势",
+            title: "Timing & Trends",
             icon: <Send className="w-3 h-3 text-orange-400" />,
             items: [
-                { key: 'timeliness', label: 'Time 时效', icon: '⏰' },
-                { key: 'trendElements', label: 'Trend 流行', icon: '🔥' },
+                { key: 'timeliness', label: 'Time', icon: '⏰' },
+                { key: 'trendElements', label: 'Trend', icon: '🔥' },
             ]
         }
     ];
@@ -248,7 +248,7 @@ export function VariableSelector({ value, onChange }: VariableSelectorProps) {
                     className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 rounded-xl text-xs text-indigo-200 hover:from-indigo-500/30 hover:to-purple-500/30 hover:border-indigo-400/50 transition-all duration-300 group"
                 >
                     <Dices className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
-                    Randomize All 随机全部
+                    Randomize All
                 </button>
             </div>
             {groups.map((group, groupIdx) => (

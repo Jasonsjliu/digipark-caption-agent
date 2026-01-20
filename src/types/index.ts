@@ -19,7 +19,7 @@ export interface GenerationHistory {
 }
 
 export interface VariableSelections {
-    // 1. 📝 文案风格类 (Style & Tone)
+    // 1. 📝 Style & Tone
     tone?: string | string[];
     writingStyle?: string | string[];
     perspective?: string | string[];
@@ -27,23 +27,23 @@ export interface VariableSelections {
     paces?: string | string[];
     valueProposition?: string | string[];
 
-    // 2. 🎯 开头Hook类 (Hooks)
+    // 2. 🎯 Hooks
     hookType?: string | string[];
     openingTemplate?: string | string[];
 
-    // 3. 🎨 内容角度类 (Content Angle)
+    // 3. 🎨 Content Angle
     contentFramework?: string | string[];
     targetAudience?: string | string[];
 
-    // 4. 📱 平台适配类 (Platform)
+    // 4. 📱 Platform
     captionLength?: string | string[];
     emojiStyle?: string | string[];
     paragraphStructure?: string | string[];
 
-    // 5. 💡 CTA行动号召类 (CTA)
+    // 5. 💡 Call to Action (CTA)
     ctaTone?: string | string[]; // User retained only ctaTone
 
-    // 6. 🌐 时效与趋势类 (Time & Trends)
+    // 6. 🌐 Time & Trends
     timeliness?: string | string[];
     trendElements?: string | string[];
 }

@@ -212,65 +212,51 @@ export function buildXiaohongshuPrompt(
     variables: VariableSelections,
     topic?: string
 ): string {
-    const variableDescriptions = Object.entries(variables)
-        .map(([key, value]) => {
-            // @ts-ignore
-            if (Array.isArray(value)) {
-                // @ts-ignore
-                const labels = value.map(v => getVariableLabel(key as keyof typeof PRESETS, v, 'zh')).join(', ');
-                // @ts-ignore
-                return `- ${PRESETS[key as keyof typeof PRESETS].label}: ${labels}`;
-            }
-            // @ts-ignore
-            const label = getVariableLabel(key as keyof typeof PRESETS, value!, 'zh');
-            // @ts-ignore
-            return `- ${PRESETS[key as keyof typeof PRESETS].label}: ${label}`;
-        })
-        .join('\n');
-
     return `${DIGIPARK_SYSTEM_PROMPT}
 
 PLATFORM: Xiaohongshu (Little Red Book) (Lifestyle, Authentic, Helpful, Emoji-rich)
 
-你是一位专业及资深的 Digipark 小红书内容主理人。请用纯中文（专有名词除外）生成一条独特、吸引人的小红书文案。
+You are a professional and senior Digipark Xiaohongshu (Red Note) content manager. Please generate a unique, attractive Xiaohongshu caption in pure Chinese (except for proper nouns).
 
-需要融入的关键词: ${keywords.join(', ')}
-${topic ? `主题方向: ${topic}` : ''}
+CONTEXT & KEYWORDS:
+- Keywords to include: ${keywords.join(', ')}
+${topic ? `- Topic Direction: ${topic}` : ''}
 
-文案风格与基调:
-${Array.isArray(variables.tone) ? `- 语气: ${variables.tone.map(v => getVariableLabel('tone', v, 'zh')).join(', ')}` : variables.tone ? `- 语气: ${getVariableLabel('tone', variables.tone, 'zh')}` : ''}
-${Array.isArray(variables.writingStyle) ? `- 写作风格: ${variables.writingStyle.map(v => getVariableLabel('writingStyle', v, 'zh')).join(', ')}` : variables.writingStyle ? `- 写作风格: ${getVariableLabel('writingStyle', variables.writingStyle, 'zh')}` : ''}
-${Array.isArray(variables.perspective) ? `- 人称视角: ${variables.perspective.map(v => getVariableLabel('perspective', v, 'zh')).join(', ')}` : variables.perspective ? `- 人称视角: ${getVariableLabel('perspective', variables.perspective, 'zh')}` : ''}
-${Array.isArray(variables.emotionalAppeal) ? `- 情感诉求: ${variables.emotionalAppeal.map(v => getVariableLabel('emotionalAppeal', v, 'zh')).join(', ')}` : variables.emotionalAppeal ? `- 情感诉求: ${getVariableLabel('emotionalAppeal', variables.emotionalAppeal, 'zh')}` : ''}
-${Array.isArray(variables.paces) ? `- 叙事节奏: ${variables.paces.map(v => getVariableLabel('paces', v, 'zh')).join(', ')}` : variables.paces ? `- 叙事节奏: ${getVariableLabel('paces', variables.paces, 'zh')}` : ''}
-${Array.isArray(variables.valueProposition) ? `- 价值主张: ${variables.valueProposition.map(v => getVariableLabel('valueProposition', v, 'zh')).join(', ')}` : variables.valueProposition ? `- 价值主张: ${getVariableLabel('valueProposition', variables.valueProposition, 'zh')}` : ''}
+STYLE & TONE:
+${Array.isArray(variables.tone) ? `- Tone: ${variables.tone.map(v => getVariableLabel('tone', v, 'en')).join(', ')}` : variables.tone ? `- Tone: ${getVariableLabel('tone', variables.tone, 'en')}` : ''}
+${Array.isArray(variables.writingStyle) ? `- Writing Style: ${variables.writingStyle.map(v => getVariableLabel('writingStyle', v, 'en')).join(', ')}` : variables.writingStyle ? `- Writing Style: ${getVariableLabel('writingStyle', variables.writingStyle, 'en')}` : ''}
+${Array.isArray(variables.perspective) ? `- Perspective: ${variables.perspective.map(v => getVariableLabel('perspective', v, 'en')).join(', ')}` : variables.perspective ? `- Perspective: ${getVariableLabel('perspective', variables.perspective, 'en')}` : ''}
+${Array.isArray(variables.emotionalAppeal) ? `- Emotional Appeal: ${variables.emotionalAppeal.map(v => getVariableLabel('emotionalAppeal', v, 'en')).join(', ')}` : variables.emotionalAppeal ? `- Emotional Appeal: ${getVariableLabel('emotionalAppeal', variables.emotionalAppeal, 'en')}` : ''}
+${Array.isArray(variables.paces) ? `- Pacing: ${variables.paces.map(v => getVariableLabel('paces', v, 'en')).join(', ')}` : variables.paces ? `- Pacing: ${getVariableLabel('paces', variables.paces, 'en')}` : ''}
+${Array.isArray(variables.valueProposition) ? `- Value Prop: ${variables.valueProposition.map(v => getVariableLabel('valueProposition', v, 'en')).join(', ')}` : variables.valueProposition ? `- Value Prop: ${getVariableLabel('valueProposition', variables.valueProposition, 'en')}` : ''}
 
-开头HOOK策略:
-${Array.isArray(variables.hookType) ? `- 开头类型: ${variables.hookType.map(v => getVariableLabel('hookType', v, 'zh')).join(', ')}` : variables.hookType ? `- 开头类型: ${getVariableLabel('hookType', variables.hookType, 'zh')}` : ''}
-${Array.isArray(variables.openingTemplate) ? `- 开场模板: ${variables.openingTemplate.map(v => getVariableLabel('openingTemplate', v, 'zh')).join(', ')}` : variables.openingTemplate ? `- 开场模板: ${getVariableLabel('openingTemplate', variables.openingTemplate, 'zh')}` : ''}
+HOOK STRATEGY:
+${Array.isArray(variables.hookType) ? `- Hook Type: ${variables.hookType.map(v => getVariableLabel('hookType', v, 'en')).join(', ')}` : variables.hookType ? `- Hook Type: ${getVariableLabel('hookType', variables.hookType, 'en')}` : ''}
+${Array.isArray(variables.openingTemplate) ? `- Opener Template: ${variables.openingTemplate.map(v => getVariableLabel('openingTemplate', v, 'en')).join(', ')}` : variables.openingTemplate ? `- Opener Template: ${getVariableLabel('openingTemplate', variables.openingTemplate, 'en')}` : ''}
 
-内容角度:
-${Array.isArray(variables.contentFramework) ? `- 内容框架: ${variables.contentFramework.map(v => getVariableLabel('contentFramework', v, 'zh')).join(', ')}` : variables.contentFramework ? `- 内容框架: ${getVariableLabel('contentFramework', variables.contentFramework, 'zh')}` : ''}
-${Array.isArray(variables.targetAudience) ? `- 目标受众: ${variables.targetAudience.map(v => getVariableLabel('targetAudience', v, 'zh')).join(', ')}` : variables.targetAudience ? `- 目标受众: ${getVariableLabel('targetAudience', variables.targetAudience, 'zh')}` : ''}
+CONTENT ANGLE:
+${Array.isArray(variables.contentFramework) ? `- Framework: ${variables.contentFramework.map(v => getVariableLabel('contentFramework', v, 'en')).join(', ')}` : variables.contentFramework ? `- Framework: ${getVariableLabel('contentFramework', variables.contentFramework, 'en')}` : ''}
+${Array.isArray(variables.targetAudience) ? `- Target Audience: ${variables.targetAudience.map(v => getVariableLabel('targetAudience', v, 'en')).join(', ')}` : variables.targetAudience ? `- Target Audience: ${getVariableLabel('targetAudience', variables.targetAudience, 'en')}` : ''}
 
-排版与格式:
-${variables.captionLength ? `- 长度: ${Array.isArray(variables.captionLength) ? variables.captionLength.map(v => getVariableLabel('captionLength', v, 'zh')).join(', ') : getVariableLabel('captionLength', variables.captionLength, 'zh')}` : ''}
-${variables.emojiStyle ? `- Emoji风格: ${Array.isArray(variables.emojiStyle) ? variables.emojiStyle.map(v => getVariableLabel('emojiStyle', v, 'zh')).join(', ') : getVariableLabel('emojiStyle', variables.emojiStyle, 'zh')}` : ''}
-${Array.isArray(variables.paragraphStructure) ? `- 段落结构: ${variables.paragraphStructure.map(v => getVariableLabel('paragraphStructure', v, 'zh')).join(', ')}` : variables.paragraphStructure ? `- 段落结构: ${getVariableLabel('paragraphStructure', variables.paragraphStructure, 'zh')}` : ''}
+STRUCTURE & FORMAT:
+${variables.captionLength ? `- Length: ${Array.isArray(variables.captionLength) ? variables.captionLength.map(v => getVariableLabel('captionLength', v, 'en')).join(', ') : getVariableLabel('captionLength', variables.captionLength, 'en')}` : ''}
+${variables.emojiStyle ? `- Emoji Style: ${Array.isArray(variables.emojiStyle) ? variables.emojiStyle.map(v => getVariableLabel('emojiStyle', v, 'en')).join(', ') : getVariableLabel('emojiStyle', variables.emojiStyle, 'en')}` : ''}
+${Array.isArray(variables.paragraphStructure) ? `- Structure: ${variables.paragraphStructure.map(v => getVariableLabel('paragraphStructure', v, 'en')).join(', ')}` : variables.paragraphStructure ? `- Structure: ${getVariableLabel('paragraphStructure', variables.paragraphStructure, 'en')}` : ''}
 
-CTA 行动号召:
-${Array.isArray(variables.ctaTone) ? `- CTA语气: ${variables.ctaTone.map(v => getVariableLabel('ctaTone', v, 'zh')).join(', ')}` : variables.ctaTone ? `- CTA语气: ${getVariableLabel('ctaTone', variables.ctaTone, 'zh')}` : ''}
+CALL TO ACTION:
+${Array.isArray(variables.ctaTone) ? `- CTA Tone: ${variables.ctaTone.map(v => getVariableLabel('ctaTone', v, 'en')).join(', ')}` : variables.ctaTone ? `- CTA Tone: ${getVariableLabel('ctaTone', variables.ctaTone, 'en')}` : ''}
 
-时效与趋势:
-${Array.isArray(variables.timeliness) ? `- 时效性: ${variables.timeliness.join(', ')}` : variables.timeliness ? `- 时效性: ${variables.timeliness}` : ''}
-${Array.isArray(variables.trendElements) ? `- 流行元素: ${variables.trendElements.join(', ')}` : variables.trendElements ? `- 流行元素: ${variables.trendElements}` : ''}
+TIMING & TRENDS:
+${Array.isArray(variables.timeliness) ? `- Timeliness: ${variables.timeliness.map(v => getVariableLabel('timeliness', v, 'en')).join(', ')}` : variables.timeliness ? `- Timeliness: ${getVariableLabel('timeliness', variables.timeliness, 'en')}` : ''}
+${Array.isArray(variables.trendElements) ? `- Trends: ${variables.trendElements.map(v => getVariableLabel('trendElements', v, 'en')).join(', ')}` : variables.trendElements ? `- Trends: ${getVariableLabel('trendElements', variables.trendElements, 'en')}` : ''}
 
-生成5-10个相关的话题标签，混合热门标签和垂直领域标签。
+INSTRUCTIONS:
+Generate 5-10 relevant hashtags, mixing trending tags and vertical tags.
 
-输出格式 (仅JSON，无markdown):
+OUTPUT FORMAT (JSON only, no markdown):
 {
-  "caption": "你的文案内容（不含标签）",
-  "tags": ["#标签1", "#标签2", "#标签3", ...]
+  "caption": "Your caption content (excluding tags)",
+  "tags": ["#Tag1", "#Tag2", "#Tag3", ...]
 }`;
 }
 

@@ -14,12 +14,12 @@ const KEYWORDS_STORAGE_KEY = 'dipark_keywords_v1';
 
 // Keyword categories
 const CATEGORIES = [
-    { value: 'general', label: '通用', labelEn: 'General', icon: '📌' },
-    { value: 'product', label: '产品', labelEn: 'Product', icon: '🛍️' },
-    { value: 'emotion', label: '情感', labelEn: 'Emotion', icon: '❤️' },
-    { value: 'action', label: '行动', labelEn: 'Action', icon: '🚀' },
-    { value: 'trend', label: '趋势', labelEn: 'Trend', icon: '🔥' },
-    { value: 'location', label: '地点', labelEn: 'Location', icon: '📍' },
+    { value: 'general', label: 'General', labelEn: 'General', icon: '📌' },
+    { value: 'product', label: 'Product', labelEn: 'Product', icon: '🛍️' },
+    { value: 'emotion', label: 'Emotion', labelEn: 'Emotion', icon: '❤️' },
+    { value: 'action', label: 'Action', labelEn: 'Action', icon: '🚀' },
+    { value: 'trend', label: 'Trend', labelEn: 'Trend', icon: '🔥' },
+    { value: 'location', label: 'Location', labelEn: 'Location', icon: '📍' },
 ];
 
 export function KeywordLibrary() {
@@ -148,7 +148,7 @@ export function KeywordLibrary() {
     };
 
     const handleDeleteKeyword = async (id: string) => {
-        if (!confirm('确定要删除这个关键词吗？')) return;
+        if (!confirm('Are you sure you want to delete this keyword?')) return;
 
         setIsSyncing(true);
         setSyncStatus('syncing');
@@ -192,8 +192,8 @@ export function KeywordLibrary() {
                 <div className="flex items-center gap-3">
                     {/* Sync Status */}
                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs ${syncStatus === 'synced' ? 'bg-green-500/10 text-green-400' :
-                            syncStatus === 'syncing' ? 'bg-yellow-500/10 text-yellow-400' :
-                                'bg-red-500/10 text-red-400'
+                        syncStatus === 'syncing' ? 'bg-yellow-500/10 text-yellow-400' :
+                            'bg-red-500/10 text-red-400'
                         }`}>
                         {syncStatus === 'synced' && <Cloud className="w-3.5 h-3.5" />}
                         {syncStatus === 'syncing' && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
@@ -237,7 +237,7 @@ export function KeywordLibrary() {
                                 <div className="md:col-span-2 relative">
                                     <input
                                         type="text"
-                                        placeholder="输入关键词 (中文或英文)..."
+                                        placeholder="Enter keyword..."
                                         value={newKeyword}
                                         onChange={e => setNewKeyword(e.target.value)}
                                         className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500"
@@ -263,7 +263,7 @@ export function KeywordLibrary() {
                                 >
                                     {CATEGORIES.map(cat => (
                                         <option key={cat.value} value={cat.value}>
-                                            {cat.icon} {cat.label} / {cat.labelEn}
+                                            {cat.icon} {cat.label}
                                         </option>
                                     ))}
                                 </select>
@@ -294,8 +294,8 @@ export function KeywordLibrary() {
                 <button
                     onClick={() => setSelectedCategory(null)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${selectedCategory === null
-                            ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                            : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10'
+                        ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                        : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10'
                         }`}
                 >
                     All ({keywords.length})
@@ -307,8 +307,8 @@ export function KeywordLibrary() {
                             key={cat.value}
                             onClick={() => setSelectedCategory(cat.value)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${selectedCategory === cat.value
-                                    ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                                    : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10'
+                                ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                                : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10'
                                 }`}
                         >
                             {cat.icon} {cat.labelEn} ({count})

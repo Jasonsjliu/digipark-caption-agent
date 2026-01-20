@@ -29,32 +29,32 @@ const CATEGORY_ICONS = {
 // Groups definition (same as VariableSelector)
 const GROUPS = [
     {
-        title: "Style & Tone 文案风格",
+        title: "Style & Tone",
         icon: <Sparkles className="w-3.5 h-3.5 text-purple-400" />,
         keys: ['tone', 'writingStyle', 'perspective', 'emotionalAppeal', 'paces', 'valueProposition']
     },
     {
-        title: "Hook Strategy 开头策略",
+        title: "Hook Strategy",
         icon: <Target className="w-3.5 h-3.5 text-red-400" />,
         keys: ['hookType', 'openingTemplate']
     },
     {
-        title: "Content Angle 内容角度",
+        title: "Content Angle",
         icon: <Briefcase className="w-3.5 h-3.5 text-cyan-400" />,
         keys: ['contentFramework', 'targetAudience']
     },
     {
-        title: "Platform & Format 平台格式",
+        title: "Platform & Format",
         icon: <Layout className="w-3.5 h-3.5 text-pink-400" />,
         keys: ['captionLength', 'emojiStyle', 'paragraphStructure']
     },
     {
-        title: "Call to Action 行动号召",
+        title: "Call to Action",
         icon: <Megaphone className="w-3.5 h-3.5 text-green-400" />,
         keys: ['ctaTone']
     },
     {
-        title: "Timing & Trends 时效趋势",
+        title: "Timing & Trends",
         icon: <Send className="w-3.5 h-3.5 text-orange-400" />,
         keys: ['timeliness', 'trendElements']
     }
@@ -307,7 +307,7 @@ export function VariableLibrary() {
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             <span className="text-2xl">{CATEGORY_ICONS[selectedKey as keyof typeof CATEGORY_ICONS]}</span>
-                            <h2 className="text-xl font-bold text-white">{currentPreset.label} / {currentPreset.labelEn}</h2>
+                            <h2 className="text-xl font-bold text-white">{currentPreset.label}</h2>
                         </div>
                         <p className="text-xs text-gray-500 pl-1">
                             Manage options for this category.
@@ -358,7 +358,7 @@ export function VariableLibrary() {
                                     <div className="relative">
                                         <input
                                             type="text"
-                                            placeholder="Type anything (e.g. 'Cyberpunk' or '赛博朋克')..."
+                                            placeholder="Type anything (e.g. 'Cyberpunk')..."
                                             value={smartInput}
                                             onChange={e => setSmartInput(e.target.value)}
                                             className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 shadow-inner"
@@ -380,7 +380,7 @@ export function VariableLibrary() {
                                                 className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-white/5 rounded-lg p-4 border border-white/5"
                                             >
                                                 <div className="flex flex-col gap-1">
-                                                    <label className="text-[10px] text-gray-500 uppercase">CN Label</label>
+                                                    <label className="text-[10px] text-gray-500 uppercase">Label</label>
                                                     <input
                                                         value={newItem.label || ''}
                                                         onChange={e => setNewItem({ ...newItem, label: e.target.value })}
@@ -458,9 +458,11 @@ export function VariableLibrary() {
                                         <span className={`text-sm font-medium ${isDisabled ? 'text-gray-500 line-through' : 'text-gray-200'}`}>
                                             {opt.label}
                                         </span>
-                                        <span className="text-[10px] text-gray-500">
-                                            {opt.labelEn}
-                                        </span>
+                                        {opt.labelEn !== opt.label && (
+                                            <span className="text-[10px] text-gray-500">
+                                                {opt.labelEn}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
 

@@ -44,7 +44,7 @@ export function SettingsDrawer({
                     {/* Header */}
                     <div className="p-6 border-b border-white/5 flex justify-between items-center">
                         <h2 className="text-xl font-light text-white flex items-center gap-3">
-                            <span className="text-2xl">⚙️</span> 控制台
+                            <span className="text-2xl">⚙️</span> Settings
                         </h2>
                         <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors text-gray-400">
                             ✕
@@ -56,10 +56,10 @@ export function SettingsDrawer({
 
                         {/* 1. Sliders Section */}
                         <section className="space-y-6">
-                            <h3 className="text-xs uppercase tracking-widest text-gray-500 font-bold">灵感调优</h3>
+                            <h3 className="text-xs uppercase tracking-widest text-gray-500 font-bold">Inspiration Tuning</h3>
 
                             <SoulSlider
-                                label="🧠 脑洞程度 (Temperature)"
+                                label="🧠 Creativity (Temperature)"
                                 value={creativity}
                                 min={0} max={100}
                                 onChange={setCreativity}
@@ -67,17 +67,17 @@ export function SettingsDrawer({
                             />
 
                             <SoulSlider
-                                label="🎭 语气强度 (Intensity)"
+                                label="🎭 Tone Intensity"
                                 value={toneIntensity}
                                 min={1} max={5}
                                 onChange={setToneIntensity}
-                                formatValue={(v) => ['😐 平淡', '🙂 柔和', '😊 标准', '🤩 强烈', '🤯 疯狂'][v - 1]}
+                                formatValue={(v) => ['😐 Flat', '🙂 Soft', '😊 Standard', '🤩 Strong', '🤯 Crazy'][v - 1]}
                             />
                         </section>
 
                         {/* 2. Platform Counts */}
                         <section className="space-y-6">
-                            <h3 className="text-xs uppercase tracking-widest text-gray-500 font-bold">生成数量</h3>
+                            <h3 className="text-xs uppercase tracking-widest text-gray-500 font-bold">Generation Count</h3>
                             <div className="grid grid-cols-3 gap-4">
                                 {[
                                     { id: 'tiktok', icon: '🎵', label: 'TikTok' },
@@ -100,7 +100,7 @@ export function SettingsDrawer({
 
                         {/* 3. Variables */}
                         <section className="space-y-6">
-                            <h3 className="text-xs uppercase tracking-widest text-gray-500 font-bold">高级变量</h3>
+                            <h3 className="text-xs uppercase tracking-widest text-gray-500 font-bold">Advanced Variables</h3>
                             <VariableSelector value={variables} onChange={setVariables} />
                         </section>
 

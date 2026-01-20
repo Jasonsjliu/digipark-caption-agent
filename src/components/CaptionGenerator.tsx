@@ -143,7 +143,7 @@ export function CaptionGenerator() {
             await saveToCloud(allCaptions);
 
             setTimeout(() => document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
-        } catch (err) { setError(err instanceof Error ? err.message : '生成失败'); }
+        } catch (err) { setError(err instanceof Error ? err.message : 'Generation failed'); }
         finally { setIsGenerating(false); }
     };
 

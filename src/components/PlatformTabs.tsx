@@ -18,7 +18,7 @@ export function PlatformTabs({ results }: PlatformTabsProps) {
     const tabs = [
         { id: 'tiktok', label: 'TikTok', icon: '🎵', count: results.tiktok.length },
         { id: 'instagram', label: 'Instagram', icon: '📸', count: results.instagram.length },
-        { id: 'xiaohongshu', label: '小红书', icon: '📕', count: results.xiaohongshu.length },
+        { id: 'xiaohongshu', label: 'Xiaohongshu', icon: '📕', count: results.xiaohongshu.length },
     ] as const;
 
     const currentResults = results[activeTab];
@@ -27,7 +27,7 @@ export function PlatformTabs({ results }: PlatformTabsProps) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-gray-500">
                 <div className="text-4xl mb-4 opacity-20">✨</div>
-                <p>准备生成您的第一篇爆款文案</p>
+                <p>Ready to generate your first viral caption</p>
             </div>
         );
     }
@@ -61,7 +61,7 @@ export function PlatformTabs({ results }: PlatformTabsProps) {
                 ))}
                 {currentResults.length === 0 && (
                     <div className="col-span-full py-12 text-center text-gray-500 bg-black/20 backdrop-blur-md border border-white/5 rounded-xl border-dashed">
-                        该平台暂无生成结果
+                        No results for this platform
                     </div>
                 )}
             </div>

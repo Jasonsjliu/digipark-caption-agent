@@ -54,21 +54,21 @@ export function InlineSettings({
                 {/* 2. Sliders */}
                 <section className="grid md:grid-cols-2 gap-10">
                     <SoulSlider
-                        label="🧠 脑洞 (Temperature)"
+                        label="🧠 Creativity (Temperature)"
                         value={creativity} min={0} max={100}
                         onChange={setCreativity} formatValue={v => `${v}%`}
                     />
                     <SoulSlider
-                        label="🎭 语气 (Intensity)"
+                        label="🎭 Intensity"
                         value={toneIntensity} min={1} max={5}
                         onChange={setToneIntensity}
-                        formatValue={v => ['😐 平淡', '🙂 柔和', '😊 标准', '🤩 强烈', '🤯 疯狂'][v - 1]}
+                        formatValue={v => ['😐 Flat', '🙂 Soft', '😊 Standard', '🤩 Strong', '🤯 Crazy'][v - 1]}
                     />
                 </section>
 
                 {/* 3. Variables (Collapsible or just inline) */}
                 <section>
-                    <h3 className="text-xs uppercase tracking-widest text-gray-500 font-bold mb-4">高级设置</h3>
+                    <h3 className="text-xs uppercase tracking-widest text-gray-500 font-bold mb-4">Advanced Settings</h3>
                     <VariableSelector value={variables} onChange={setVariables} />
                 </section>
 
