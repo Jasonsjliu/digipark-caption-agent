@@ -17,16 +17,19 @@ export async function POST(request: NextRequest) {
             const shuffled = [...availableKeywords].sort(() => Math.random() - 0.5);
             selectedKeywords = shuffled.slice(0, Math.min(keywordCount, shuffled.length));
         } else {
-            // Fallback to sample keywords if no user keywords available
-            const sampleKeywords = [
-                'growth', 'success', 'productivity', 'marketing', 'business',
-                'digital', 'social media', 'content', 'strategy', 'engagement',
-                'viral', 'trending', 'tips', 'hacks', 'secrets',
-                'entrepreneur', 'startup', 'innovation', 'technology', 'future'
+            // Fallback: Digipark-themed keywords when user's library is empty
+            const digiparkKeywords = [
+                'immersive art', 'digital experience', 'Sydney attraction',
+                'interactive exhibit', 'light installation', 'family fun',
+                'weekend activity', 'photo opportunity', 'projection mapping',
+                'sensory journey', 'art meets technology', 'indoor adventure',
+                'must-see exhibition', 'creative escape', 'visual wonderland',
+                'date night idea', 'hidden gem Sydney', 'instagrammable spot',
+                'futuristic gallery', 'unforgettable experience'
             ];
 
-            // Randomly select keywords
-            const shuffled = [...sampleKeywords].sort(() => Math.random() - 0.5);
+            // Randomly select from fallback keywords
+            const shuffled = [...digiparkKeywords].sort(() => Math.random() - 0.5);
             selectedKeywords = shuffled.slice(0, Math.min(keywordCount, shuffled.length));
         }
 
