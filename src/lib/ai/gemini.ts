@@ -40,12 +40,6 @@ BRAND VOICE & POSITIONING:
 3. **TECH-FORWARD**: Cutting-edge without being cold - technology serves emotion and experience
 4. **LOCAL PRIDE**: Proudly Australian.
 
-CONTENT GUIDELINES:
-- Highlight the EXPERIENTIAL nature (what people will see, feel, experience)
-- Use vivid, sensory language (light, color, immersion, wonder)
-- Emphasize shareability and photo-worthiness for social media
-- Call out specific attractions when relevant (Mirror Maze, Orbital Cinema, Holographic Studio, etc.)
-
 TONE: Exciting, imaginative, warm, inviting - like a friend sharing an incredible discovery.
 `;
 
