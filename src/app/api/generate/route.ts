@@ -21,10 +21,10 @@ export async function POST(request: NextRequest) {
             const digiparkKeywords = [
                 'immersive art', 'digital experience', 'Sydney attraction',
                 'interactive exhibit', 'light installation', 'family fun',
-                'weekend activity', 'photo opportunity', 'projection mapping',
+                'photo opportunity', 'projection mapping',
                 'sensory journey', 'art meets technology', 'indoor adventure',
                 'must-see exhibition', 'creative escape', 'visual wonderland',
-                'date night idea', 'hidden gem Sydney', 'instagrammable spot',
+                'hidden gem Sydney', 'instagrammable spot',
                 'futuristic gallery', 'unforgettable experience'
             ];
 
@@ -32,6 +32,14 @@ export async function POST(request: NextRequest) {
             const shuffled = [...digiparkKeywords].sort(() => Math.random() - 0.5);
             selectedKeywords = shuffled.slice(0, Math.min(keywordCount, shuffled.length));
         }
+
+        console.log('[API] Generation Request:', {
+            model,
+            topic,
+            variableCount: Object.keys(variables).length,
+            variables,
+            selectedKeywords
+        });
 
         // Generate captions
         const result = await generateCaptions(model, selectedKeywords, variables, counts, topic);

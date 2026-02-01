@@ -27,7 +27,7 @@ export function CaptionGenerator() {
     const [creativity, setCreativity] = useState(70);
     const [toneIntensity, setToneIntensity] = useState(3);
     const [isManualMode, setIsManualMode] = useState(false);
-    const [randomKeywordCount, setRandomKeywordCount] = useState(5);
+    const [randomKeywordCount, setRandomKeywordCount] = useState(0);
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [results, setResults] = useState<{ tiktok: GeneratedCaption[]; instagram: GeneratedCaption[]; xiaohongshu: GeneratedCaption[]; }>({ tiktok: [], instagram: [], xiaohongshu: [] });
@@ -122,17 +122,21 @@ export function CaptionGenerator() {
     const handleGenerate = async () => {
         setIsGenerating(true); setError(null);
         try {
+            const payload = {
+                topic: topic || undefined,
+                variables, counts,
+                model,
+                temperature: creativity / 100, intensity: toneIntensity,
+                keywordCount: randomKeywordCount,
+                availableKeywords: !isManualMode ? availableKeywords.map(k => k.keyword) : undefined,
+                specificKeywords: isManualMode && activeKeywords.length > 0 ? activeKeywords.map(k => k.keyword) : undefined
+            };
+
+            console.log('[Frontend] Sending Generation Request:', payload);
+
             const response = await fetch('/api/generate', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    topic: topic || undefined,
-                    variables, counts,
-                    model,
-                    temperature: creativity / 100, intensity: toneIntensity,
-                    keywordCount: randomKeywordCount,
-                    availableKeywords: !isManualMode ? availableKeywords.map(k => k.keyword) : undefined,
-                    specificKeywords: isManualMode && activeKeywords.length > 0 ? activeKeywords.map(k => k.keyword) : undefined
-                }),
+                body: JSON.stringify(payload),
             });
             const data = await response.json();
             if (!data.success) throw new Error(data.error || 'Generation failed');
@@ -209,7 +213,7 @@ export function CaptionGenerator() {
                                 <span>Random pool size:</span>
                                 <input
                                     type="range"
-                                    min="1" max="10"
+                                    min="0" max="10"
                                     value={randomKeywordCount}
                                     onChange={(e) => setRandomKeywordCount(parseInt(e.target.value))}
                                     className="w-24 accent-indigo-400 h-0.5 bg-white/10 rounded-full appearance-none cursor-pointer opacity-60 hover:opacity-100 transition-opacity"

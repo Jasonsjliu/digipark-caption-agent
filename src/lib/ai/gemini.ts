@@ -65,7 +65,7 @@ export function buildTikTokPrompt(
         })
         .join('\n');
 
-    return `${DIGIPARK_SYSTEM_PROMPT}
+    const prompt = `${DIGIPARK_SYSTEM_PROMPT}
 
 PLATFORM: TikTok (Fast-paced, Visual, Trend-aware)
 
@@ -125,6 +125,9 @@ OUTPUT FORMAT (JSON only, no markdown):
     "broadTraffic": "#YourBroadTag"
   }
 }`;
+
+    console.log('[Gemini] Generated TikTok Prompt:', prompt);
+    return prompt;
 }
 
 // Build the prompt for Instagram captions
