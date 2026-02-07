@@ -264,7 +264,7 @@ async function generateSingleCaption(
     topic?: string
 ): Promise<GeneratedCaption> {
     const model = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash-exp',
+        model: 'gemini-3-flash-preview',
         generationConfig: {
             temperature: 0.9, // Higher temperature for more variety
             topP: 0.95,

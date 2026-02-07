@@ -11,8 +11,8 @@ interface ModelSelectorProps {
 export function ModelSelector({ value, onChange }: ModelSelectorProps) {
     const models: { id: ModelType; label: string; icon: React.ReactNode; desc: string }[] = [
         {
-            id: 'gemini-2.0-flash-exp',
-            label: 'Gemini 2.0',
+            id: 'gemini-3-flash-preview',
+            label: 'Gemini 3.0 Flash',
             icon: <Sparkles className="w-3.5 h-3.5" />,
             desc: 'Fastest (Free)'
         },

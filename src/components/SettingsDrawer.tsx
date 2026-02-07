@@ -18,6 +18,8 @@ interface SettingsDrawerProps {
     setToneIntensity: (v: number) => void;
 }
 
+import { AuthButton } from './auth/AuthButton';
+
 export function SettingsDrawer({
     isOpen, onClose,
     variables, setVariables,
@@ -104,6 +106,14 @@ export function SettingsDrawer({
                             <VariableSelector value={variables} onChange={setVariables} />
                         </section>
 
+                    </div>
+
+                    {/* Footer / Auth */}
+                    <div className="p-6 border-t border-white/5">
+                        <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-500 uppercase tracking-widest font-bold">Account</span>
+                            <AuthButton />
+                        </div>
                     </div>
                 </div>
             </div>

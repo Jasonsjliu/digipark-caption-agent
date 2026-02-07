@@ -33,32 +33,24 @@ interface LibraryEntry {
     created_at: string;
 }
 
-const DEVICE_ID_KEY = 'dipark_device_id';
-
-// Get or create a device ID for anonymous users
-function getDeviceId(): string {
-    if (typeof window === 'undefined') return 'server';
-
-    let deviceId = localStorage.getItem(DEVICE_ID_KEY);
-    if (!deviceId) {
-        deviceId = 'device_' + crypto.randomUUID();
-        localStorage.setItem(DEVICE_ID_KEY, deviceId);
-    }
-    return deviceId;
-}
-
 // ============ KEYWORDS SYNC ============
 
 export async function loadKeywordsFromCloud(): Promise<CloudKeyword[]> {
     const supabase = createClient();
-    const deviceId = getDeviceId();
 
-    // Query keywords that belong to this device OR are system presets
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // If no user, we might want to return empty or handle local fallback higher up.
+    // However, the component Logic (KeywordLibrary.tsx) handles local fallback if cloud returns empty array.
+    // So for anonymous users, returning [] is correct here, as they have no cloud data.
+    if (!user) return [];
+
+    // Query keywords that belong to this user OR are system presets
     const { data, error } = await supabase
         .from('library_entries')
         .select('*')
         .eq('type', 'keyword')
-        .or(`label.eq.${deviceId},label.eq.system_preset`);
+        .or(`user_id.eq.${user.id},label.eq.system_preset`);
 
     if (error) {
         console.error('Failed to load keywords from cloud:', error);
@@ -75,14 +67,20 @@ export async function loadKeywordsFromCloud(): Promise<CloudKeyword[]> {
 
 export async function saveKeywordToCloud(keyword: Omit<CloudKeyword, 'id'>): Promise<CloudKeyword | null> {
     const supabase = createClient();
-    const deviceId = getDeviceId();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        console.error('Cannot save keyword: User not logged in');
+        return null;
+    }
 
     const { data, error } = await supabase
         .from('library_entries')
         .insert({
             type: 'keyword',
             category: keyword.category,
-            label: deviceId, // Use device ID as label for filtering
+            label: 'user_keyword',
+            user_id: user.id,
             content: {
                 keyword: keyword.keyword,
                 labelEn: keyword.labelEn,
@@ -127,13 +125,15 @@ const VARIABLE_CONFIG_LABEL = 'variable_config';
 
 export async function loadVariableConfigFromCloud(): Promise<CloudVariableConfig | null> {
     const supabase = createClient();
-    const deviceId = getDeviceId();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return null;
 
     const { data, error } = await supabase
         .from('library_entries')
         .select('*')
         .eq('type', 'preset')
-        .eq('category', deviceId)
+        .eq('user_id', user.id)
         .eq('label', VARIABLE_CONFIG_LABEL)
         .single();
 
@@ -151,55 +151,30 @@ export async function loadVariableConfigFromCloud(): Promise<CloudVariableConfig
 
 export async function saveVariableConfigToCloud(config: CloudVariableConfig): Promise<boolean> {
     const supabase = createClient();
-    const deviceId = getDeviceId();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        console.error('Cannot save config: User not logged in');
+        return false;
+    }
 
     // Upsert - update if exists, insert if not
     const { error } = await supabase
         .from('library_entries')
         .upsert({
             type: 'preset',
-            category: deviceId,
+            category: 'user_settings',
             label: VARIABLE_CONFIG_LABEL,
+            user_id: user.id,
             content: config
         }, {
-            onConflict: 'type,category,label'
+            onConflict: 'type,user_id,label'
         });
 
     if (error) {
-        // If upsert fails due to missing constraint, try insert/update manually
-        const { data: existing } = await supabase
-            .from('library_entries')
-            .select('id')
-            .eq('type', 'preset')
-            .eq('category', deviceId)
-            .eq('label', VARIABLE_CONFIG_LABEL)
-            .single();
-
-        if (existing) {
-            const { error: updateError } = await supabase
-                .from('library_entries')
-                .update({ content: config })
-                .eq('id', existing.id);
-
-            if (updateError) {
-                console.error('Failed to update variable config:', updateError);
-                return false;
-            }
-        } else {
-            const { error: insertError } = await supabase
-                .from('library_entries')
-                .insert({
-                    type: 'preset',
-                    category: deviceId,
-                    label: VARIABLE_CONFIG_LABEL,
-                    content: config
-                });
-
-            if (insertError) {
-                console.error('Failed to insert variable config:', insertError);
-                return false;
-            }
-        }
+        // Fallback for complex constraints if implicit upsert fails
+        console.error('Failed to upsert variable config:', error);
+        return false;
     }
 
     return true;
@@ -207,57 +182,16 @@ export async function saveVariableConfigToCloud(config: CloudVariableConfig): Pr
 
 // ============ SYNC UTILITIES ============
 
-// Sync keywords from localStorage to cloud (for migration)
+// Sync keywords from localStorage to cloud (Migration helper)
 export async function migrateKeywordsToCloud(localKeywords: CloudKeyword[]): Promise<void> {
     const cloudKeywords = await loadKeywordsFromCloud();
     const cloudKeywordSet = new Set(cloudKeywords.map(k => k.keyword));
 
     for (const kw of localKeywords) {
         if (!cloudKeywordSet.has(kw.keyword)) {
+            // Only migrate if not exists
+            if (!kw.id?.startsWith('local_')) continue; // Skip if it looks like a cloud ID but somehow valid
             await saveKeywordToCloud(kw);
         }
-    }
-}
-
-// Sync variable config from localStorage to cloud (for migration)
-export async function migrateVariableConfigToCloud(localConfig: CloudVariableConfig): Promise<void> {
-    const cloudConfig = await loadVariableConfigFromCloud();
-
-    if (!cloudConfig) {
-        // No cloud config, upload local
-        await saveVariableConfigToCloud(localConfig);
-    } else {
-        // Merge configs - prefer cloud but add any local-only items
-        const mergedConfig = { ...cloudConfig };
-
-        for (const key of Object.keys(localConfig)) {
-            if (!mergedConfig[key]) {
-                mergedConfig[key] = localConfig[key];
-            } else {
-                // Merge custom options
-                const localCustom = localConfig[key].custom || [];
-                const cloudCustom = mergedConfig[key].custom || [];
-                const cloudCustomValues = new Set(cloudCustom.map(c => c.value));
-
-                for (const opt of localCustom) {
-                    if (!cloudCustomValues.has(opt.value)) {
-                        cloudCustom.push(opt);
-                    }
-                }
-                mergedConfig[key].custom = cloudCustom;
-
-                // Merge deleted
-                const localDeleted = localConfig[key].deleted || [];
-                const cloudDeleted = mergedConfig[key].deleted || [];
-                mergedConfig[key].deleted = [...new Set([...cloudDeleted, ...localDeleted])];
-
-                // Merge disabled
-                const localDisabled = localConfig[key].disabled || [];
-                const cloudDisabled = mergedConfig[key].disabled || [];
-                mergedConfig[key].disabled = [...new Set([...cloudDisabled, ...localDisabled])];
-            }
-        }
-
-        await saveVariableConfigToCloud(mergedConfig);
     }
 }

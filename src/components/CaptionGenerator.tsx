@@ -21,7 +21,7 @@ export function CaptionGenerator() {
     const [activeKeywords, setActiveKeywords] = useState<Keyword[]>([]);
     const [availableKeywords, setAvailableKeywords] = useState<Keyword[]>([]);
 
-    const [model, setModel] = useState<ModelType>('gemini-2.0-flash-exp');
+    const [model, setModel] = useState<ModelType>('gemini-3-flash-preview');
     const [variables, setVariables] = useState<VariableSelections>({});
     const [counts, setCounts] = useState({ tiktok: 1, instagram: 1, xiaohongshu: 1 });
     const [creativity, setCreativity] = useState(70);

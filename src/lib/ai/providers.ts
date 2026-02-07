@@ -133,7 +133,7 @@ async function generateWithOpenAICompatible(
 
 // Unified generation function
 export async function generateCaptions(
-    model: ModelType = 'gemini-2.0-flash-exp', // Default
+    model: ModelType = 'gemini-3-flash-preview', // Default
     keywords: string[],
     variables: VariableSelections,
     counts: { tiktok: number; instagram: number; xiaohongshu: number },
@@ -141,7 +141,7 @@ export async function generateCaptions(
 ) {
     console.log(`Generating with model: ${model}`);
 
-    if (model === 'gemini-2.0-flash-exp') {
+    if (model === 'gemini-3-flash-preview' || model === 'gemini-2.0-flash-exp') {
         return generateWithGemini(keywords, variables, counts, topic);
     }
 

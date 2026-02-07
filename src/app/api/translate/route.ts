@@ -15,7 +15,7 @@ export async function POST(req: Request) {
         }
 
         const result = await generateObject({
-            model: google('gemini-2.0-flash-exp'),
+            model: google('gemini-3-flash-preview'),
             schema: z.object({
                 cn: z.string().describe('The simplified Chinese translation of the text'),
                 en: z.string().describe('The English translation of the text'),

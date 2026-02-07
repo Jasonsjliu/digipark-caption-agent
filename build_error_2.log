@@ -1,0 +1,35 @@
+
+> digipark-caption-agent@0.1.0 build
+> next build
+
+▲ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 1717.5ms
+  Running TypeScript ...
+  Collecting page data using 23 workers ...
+  Generating static pages using 23 workers (0/10) ...
+  Generating static pages using 23 workers (2/10) 
+  Generating static pages using 23 workers (4/10) 
+  Generating static pages using 23 workers (7/10) 
+✓ Generating static pages using 23 workers (10/10) in 449.0ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/generate
+├ ƒ /api/translate
+├ ƒ /auth/callback
+├ ○ /history
+├ ○ /keywords
+└ ○ /login
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
