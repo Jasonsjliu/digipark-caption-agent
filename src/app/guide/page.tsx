@@ -6,10 +6,13 @@ import remarkGfm from 'remark-gfm';
 import { Logo } from '@/components/Logo';
 import Link from 'next/link';
 
+// Ensure this page is treated as a dynamic route to prevent 404s on Vercel if static gen fails
+export const dynamic = 'force-dynamic';
+
 const guideContent = `
 # 📘 Digipark Caption Agent - 操作手册 (User Guide)
 
-本手册详细介绍了 Digipark AI 文案生成器的所有功能，帮助您快速上手机并充分利用高级功能。
+本手册详细介绍了 Digipark AI 文案生成器的所有功能，帮助快速上手并充分利用高级功能。
 
 ---
 
@@ -18,7 +21,7 @@ const guideContent = `
 ### 1. 核心界面概览
 > *主界面使用了极简的 "胶囊" 设计风格，所有核心操作都集中在屏幕中央。*
 
-- **话题输入框**: 输入您想要生成文案的主题（例如："周末去露营"）。
+- **话题输入框**: 输入想要生成文案的主题（例如："情人节双人购票送7D影院活动"）。
 - **生成按钮 (✨)**: 点击开始生成。
 - **批量设置 (Batch)**: 调整一次生成的数量。
 
@@ -37,7 +40,7 @@ const guideContent = `
 选择驱动生成的 AI 大脑：
 - **Gemini (默认)**: 速度快，创意丰富，适合大多数场景。
 - **GPT-4o**: 逻辑性强，适合需要严谨结构的文案。
-- **Grok**: 风格独特，适合幽默或非主流内容。
+- **Grok**: 风格独特，偏向社交媒体属性内容。
 
 ### 2. 风格微调 (Style Tuning)
 - **Creativity (创意度)** 🎨: 拖动滑块调整。
@@ -53,16 +56,16 @@ const guideContent = `
 
 ## 🧩 变量控制 (Variable Context) - **核心功能**
 
-在 "Advanced Context" 区域，您可以精细控制文案的各个维度（如语气、受众、视角）。
+在 "Advanced Context" 区域，可以精细控制文案的各个维度（如语气、受众、视角）。
 
 ### 💡 核心逻辑：固定 vs 随机
-我们引入了全新的 **"固定 (Pin)"** 和 **"禁用 (Disable)"** 机制，让您在批量生成时拥有完美控制权。
+我们引入了全新的 **"固定 (Pin)"** 和 **"禁用 (Disable)"** 机制，让在批量生成时拥有完美控制权。
 
 | 图标 | 状态 | 描述 | 批量生成时的行为 (Batch Behavior) |
 | :--- | :--- | :--- | :--- |
-| <span style="font-size:20px">📌</span> | **Pinned (固定)** | **金色图钉** | **🔒 锁定值**: 无论怎么随，该变量永远保持您选择的值。 |
-| <span style="font-size:20px">👁️‍🗨️</span> | **Active (启用)** | 默认状态 (无图标) | **🎲 参与随机**: 如果开启 "Randomize Variables"，该变量会每次随机变化。 |
-| <span style="font-size:20px">👁️🚫</span> | **Disabled (禁用)** | **灰色划线眼睛** | **🚫 跳过**: 该变量完全不参与生成，AI 不会收到此上下文。 |
+| 📌 | **Pinned (固定)** | **金色图钉** | **🔒 锁定值**: 无论怎么随机，该变量永远保持选择的值。 |
+| ⚪ | **Active (启用)** | 默认状态 (无图标) | **🎲 参与随机**: 如果开启 "Randomize Variables"，该变量会每次随机变化。 |
+| 🚫 | **Disabled (禁用)** | **灰色/禁用** | **跳过**: 该变量完全不参与生成，AI 不会收到此上下文。 |
 
 ### 操作演示
 1.  **选择**: 点击任一标签（如 "Tone: Funny"）即可选中。

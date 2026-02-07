@@ -26,12 +26,21 @@ export function HistoryPanel() {
     const [filter, setFilter] = useState<string>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [user, setUser] = useState<User | null>(null);
+    const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
     const supabase = createClient();
 
     // Fetch history on mount
     useEffect(() => {
         checkUser();
         fetchHistory();
+
+        // Listen for updates from CaptionGenerator
+        const handleUpdate = () => {
+            console.log('Refreshing history...');
+            fetchHistory();
+        };
+        window.addEventListener('history-updated', handleUpdate);
+        return () => window.removeEventListener('history-updated', handleUpdate);
     }, []);
 
     const checkUser = async () => {
@@ -53,7 +62,10 @@ export function HistoryPanel() {
         setIsLoading(false);
     };
 
-    const deleteItem = async (id: string) => {
+    const deleteItem = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent opening modal
+        if (!confirm('Are you sure you want to delete this item?')) return;
+
         const { error } = await supabase
             .from('generation_history')
             .delete()
@@ -61,6 +73,7 @@ export function HistoryPanel() {
 
         if (!error) {
             setHistory(history.filter(h => h.id !== id));
+            if (selectedItem?.id === id) setSelectedItem(null);
         }
     };
 
@@ -135,7 +148,11 @@ export function HistoryPanel() {
             ) : (
                 <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
                     {filteredHistory.map(item => (
-                        <div key={item.id} className="bg-white/5 rounded-xl p-4 border border-white/5 hover:border-white/10 transition-colors group">
+                        <div
+                            key={item.id}
+                            onClick={() => setSelectedItem(item)}
+                            className="bg-white/5 rounded-xl p-4 border border-white/5 hover:border-white/10 hover:bg-white/10 transition-all cursor-pointer group relative"
+                        >
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-2">
@@ -143,7 +160,7 @@ export function HistoryPanel() {
                                         <span className="text-[10px] text-gray-500 uppercase tracking-wider">{item.platform}</span>
                                         <span className="text-[10px] text-gray-600">• {formatTime(item.created_at)}</span>
                                     </div>
-                                    <p className="text-sm text-gray-300 line-clamp-2">{item.caption}</p>
+                                    <p className="text-sm text-gray-300 line-clamp-2 group-hover:text-white transition-colors">{item.caption}</p>
                                     {item.tags && item.tags.length > 0 && (
                                         <div className="flex flex-wrap gap-1 mt-2">
                                             {item.tags.slice(0, 5).map((tag, i) => (
@@ -166,22 +183,12 @@ export function HistoryPanel() {
                                                     <span>🎨</span> {item.creativity}%
                                                 </div>
                                             )}
-                                            {item.intensity !== undefined && (
-                                                <div className="flex items-center gap-1" title="Intensity">
-                                                    <span>⚡</span> {item.intensity}/5
-                                                </div>
-                                            )}
-                                            {item.keywords_used && (
-                                                <div className="flex items-center gap-1" title="Keywords">
-                                                    <span>🔑</span> {item.keywords_used.length}
-                                                </div>
-                                            )}
                                         </div>
                                     )}
                                 </div>
                                 <button
-                                    onClick={() => deleteItem(item.id)}
-                                    className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400/50 hover:text-red-400 text-xs p-1"
+                                    onClick={(e) => deleteItem(item.id, e)}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400/50 hover:text-red-400 text-xs p-1 absolute top-2 right-2"
                                     title="Delete"
                                 >
                                     🗑️
@@ -189,6 +196,65 @@ export function HistoryPanel() {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Detail Modal */}
+            {selectedItem && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedItem(null)}>
+                    <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <span className="text-2xl">{platformIcon[selectedItem.platform]}</span>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-white">Content Details</h3>
+                                    <p className="text-xs text-gray-500">{formatTime(selectedItem.created_at)} • {selectedItem.model}</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setSelectedItem(null)} className="text-gray-500 hover:text-white transition-colors text-xl">
+                                ×
+                            </button>
+                        </div>
+
+                        <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+                            {/* Copy Button */}
+                            <div className="flex justify-end mb-2">
+                                <button
+                                    onClick={() => navigator.clipboard.writeText(selectedItem.caption)}
+                                    className="text-xs flex items-center gap-1 bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg transition-colors"
+                                >
+                                    📋 Copy Text
+                                </button>
+                            </div>
+
+                            <div className="bg-black/30 p-4 rounded-xl border border-white/5 mb-6">
+                                <p className="text-gray-200 whitespace-pre-wrap leading-relaxed text-base">{selectedItem.caption}</p>
+                            </div>
+
+                            <h4 className="text-sm font-medium text-gray-400 mb-3">Tags</h4>
+                            <div className="flex flex-wrap gap-2 mb-6">
+                                {selectedItem.tags.map((tag, i) => (
+                                    <span key={i} className="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full">{tag}</span>
+                                ))}
+                            </div>
+
+                            <h4 className="text-sm font-medium text-gray-400 mb-3">Generation Context</h4>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                <div className="bg-white/5 p-3 rounded-lg border border-white/5">
+                                    <span className="text-[10px] text-gray-500 block mb-1">Creativity</span>
+                                    <span className="text-sm text-white">{selectedItem.creativity}%</span>
+                                </div>
+                                <div className="bg-white/5 p-3 rounded-lg border border-white/5">
+                                    <span className="text-[10px] text-gray-500 block mb-1">Intensity</span>
+                                    <span className="text-sm text-white">{selectedItem.intensity}/5</span>
+                                </div>
+                                <div className="bg-white/5 p-3 rounded-lg border border-white/5">
+                                    <span className="text-[10px] text-gray-500 block mb-1">Keywords</span>
+                                    <span className="text-sm text-white">{selectedItem.keywords_used?.length || 0}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

@@ -147,6 +147,9 @@ export function CaptionGenerator() {
             const { error } = await supabase.from('generation_history').insert(records);
             if (error) {
                 console.error('Failed to save history:', error);
+            } else {
+                // Dispatch event to refresh history panel
+                window.dispatchEvent(new CustomEvent('history-updated'));
             }
         }
     };
