@@ -16,6 +16,11 @@ export interface GenerationHistory {
     keywords_used: string[];
     variables_used: VariableSelections;
     created_at: string;
+    // New metadata
+    model?: string;
+    creativity?: number;
+    intensity?: number;
+    keyword_count?: number;
 }
 
 export interface VariableSelections {
@@ -62,6 +67,9 @@ export interface GenerationConfig {
         instagram: number;
         xiaohongshu: number;
     };
+    temperature?: number;
+    intensity?: number;
+    disabledDimensions?: string[];
 }
 
 export interface GeneratedCaption {
@@ -70,6 +78,11 @@ export interface GeneratedCaption {
     tags: string[];
     keywordsUsed: string[];
     variablesUsed: VariableSelections;
+    // New metadata for tracking
+    model?: string;
+    creativity?: number;
+    intensity?: number;
+    keywordCount?: number;
 }
 
 export interface GenerationResult {

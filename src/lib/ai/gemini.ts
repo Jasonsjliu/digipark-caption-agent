@@ -5,12 +5,19 @@ import type { VariableSelections, GeneratedCaption, TikTokTags } from '@/types';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 // Fill in missing variables with random selections
-export function fillVariables(partial: VariableSelections): VariableSelections {
+// @ts-ignore
+export function fillVariables(partial: VariableSelections, disabledDimensions: string[] = []): VariableSelections {
     const filled: VariableSelections = { ...partial };
+    // @ts-ignore
     const presetKeys = Object.keys(PRESETS) as (keyof typeof PRESETS)[];
 
     for (const key of presetKeys) {
-        if (filled[key] === 'random') {
+        // Skip explicitly disabled dimensions
+        if (disabledDimensions.includes(key)) {
+            continue;
+        }
+
+        if (!filled[key] || filled[key] === 'random') {
             filled[key] = getRandomOption(key);
         }
     }
@@ -261,12 +268,15 @@ async function generateSingleCaption(
     platform: 'tiktok' | 'instagram' | 'xiaohongshu',
     keywords: string[],
     variables: VariableSelections,
-    topic?: string
+    topic?: string,
+    temperature: number = 0.9,
+    intensity: number = 3,
+    disabledDimensions: string[] = []
 ): Promise<GeneratedCaption> {
     const model = genAI.getGenerativeModel({
         model: 'gemini-3-flash-preview',
         generationConfig: {
-            temperature: 0.9, // Higher temperature for more variety
+            temperature: temperature,
             topP: 0.95,
         }
     });
@@ -317,6 +327,10 @@ async function generateSingleCaption(
         tags,
         keywordsUsed: keywords,
         variablesUsed: variables,
+        model: 'gemini-3-flash-preview',
+        creativity: Math.round(temperature * 100),
+        intensity: intensity,
+        keywordCount: keywords.length
     };
 }
 
@@ -325,7 +339,10 @@ export async function generateWithGemini(
     keywords: string[],
     variables: VariableSelections,
     counts: { tiktok: number; instagram: number; xiaohongshu: number },
-    topic?: string
+    topic?: string,
+    temperature: number = 0.9,
+    intensity: number = 3,
+    disabledDimensions: string[] = []
 ): Promise<{
     tiktok: GeneratedCaption[];
     instagram: GeneratedCaption[];
@@ -346,10 +363,10 @@ export async function generateWithGemini(
             // Shuffle keywords for variety
             const shuffledKeywords = [...keywords].sort(() => Math.random() - 0.5);
             // Fill in any missing variables with random selections
-            const filledVariables = fillVariables(variables);
+            const filledVariables = fillVariables(variables, disabledDimensions);
 
             try {
-                const caption = await generateSingleCaption(platform, shuffledKeywords, filledVariables, topic);
+                const caption = await generateSingleCaption(platform, shuffledKeywords, filledVariables, topic, temperature, intensity, disabledDimensions);
                 results[platform].push(caption);
             } catch (error) {
                 console.error(`Error generating ${platform} caption:`, error);

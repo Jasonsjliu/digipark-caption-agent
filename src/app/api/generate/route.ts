@@ -5,7 +5,7 @@ import type { GenerationConfig } from '@/types';
 export async function POST(request: NextRequest) {
     try {
         const body: GenerationConfig = await request.json();
-        const { topic, keywordCount, variables, counts, specificKeywords, availableKeywords, model } = body;
+        const { topic, keywordCount, variables, counts, specificKeywords, availableKeywords, model, disabledDimensions } = body;
 
         let selectedKeywords: string[] = [];
 
@@ -38,11 +38,12 @@ export async function POST(request: NextRequest) {
             topic,
             variableCount: Object.keys(variables).length,
             variables,
-            selectedKeywords
+            selectedKeywords,
+            disabledCount: disabledDimensions?.length || 0
         });
 
         // Generate captions
-        const result = await generateCaptions(model, selectedKeywords, variables, counts, topic);
+        const result = await generateCaptions(model, selectedKeywords, variables, counts, topic, body.temperature, body.intensity, disabledDimensions);
 
         return NextResponse.json({
             success: true,

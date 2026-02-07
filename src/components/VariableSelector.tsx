@@ -8,9 +8,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface VariableSelectorProps {
     value: VariableSelections;
     onChange: (value: VariableSelections) => void;
+    onDisabledChange?: (disabled: Set<PresetKey>) => void;
+    onPinnedChange?: (pinned: Set<PresetKey>) => void;
 }
 
-export function VariableSelector({ value, onChange }: VariableSelectorProps) {
+export function VariableSelector({ value, onChange, onDisabledChange, onPinnedChange }: VariableSelectorProps) {
 
     // Digipark-Native Groups
     // User-Defined Groups (English Only)
@@ -93,7 +95,10 @@ export function VariableSelector({ value, onChange }: VariableSelectorProps) {
         const savedDisabled = localStorage.getItem(DISABLED_DIMS_KEY);
         if (savedDisabled) {
             try {
-                setDisabledDimensions(new Set(JSON.parse(savedDisabled)));
+                const parsed = JSON.parse(savedDisabled);
+                const set = new Set(parsed);
+                setDisabledDimensions(set as Set<PresetKey>);
+                onDisabledChange?.(set as Set<PresetKey>);
             } catch (e) {
                 console.error('Failed to parse disabled dimensions', e);
             }
@@ -103,7 +108,10 @@ export function VariableSelector({ value, onChange }: VariableSelectorProps) {
         const savedPinned = localStorage.getItem(PINNED_DIMS_KEY);
         if (savedPinned) {
             try {
-                setPinnedDimensions(new Set(JSON.parse(savedPinned)));
+                const parsed = JSON.parse(savedPinned);
+                const set = new Set(parsed);
+                setPinnedDimensions(set as Set<PresetKey>);
+                onPinnedChange?.(set as Set<PresetKey>);
             } catch (e) {
                 console.error('Failed to parse pinned dimensions', e);
             }
@@ -124,10 +132,12 @@ export function VariableSelector({ value, onChange }: VariableSelectorProps) {
                 newPinned.delete(key);
                 setPinnedDimensions(newPinned);
                 localStorage.setItem(PINNED_DIMS_KEY, JSON.stringify([...newPinned]));
+                onPinnedChange?.(newPinned);
             }
         }
         setDisabledDimensions(newDisabled);
         localStorage.setItem(DISABLED_DIMS_KEY, JSON.stringify([...newDisabled]));
+        onDisabledChange?.(newDisabled);
     };
 
     // Toggle dimension pin (preserve value during randomization)
@@ -141,6 +151,7 @@ export function VariableSelector({ value, onChange }: VariableSelectorProps) {
         }
         setPinnedDimensions(newPinned);
         localStorage.setItem(PINNED_DIMS_KEY, JSON.stringify([...newPinned]));
+        onPinnedChange?.(newPinned);
     };
 
     // Global Click Outside Handler

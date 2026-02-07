@@ -13,6 +13,10 @@ interface HistoryItem {
     tags: string[];
     keywords_used: string[];
     variables_used: Record<string, string>;
+    model?: string;
+    creativity?: number;
+    intensity?: number;
+    keyword_count?: number;
 }
 
 export function HistoryPanel() {
@@ -135,6 +139,32 @@ export function HistoryPanel() {
                                                 <span key={i} className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full">{tag}</span>
                                             ))}
                                             {item.tags.length > 5 && <span className="text-[10px] text-gray-500">+{item.tags.length - 5}</span>}
+                                        </div>
+                                    )}
+
+                                    {/* Metadata Footer */}
+                                    {(item.model || item.creativity !== undefined) && (
+                                        <div className="flex flex-wrap gap-3 mt-2 pt-2 border-t border-white/5 text-[10px] text-gray-500 font-mono">
+                                            {item.model && (
+                                                <div className="flex items-center gap-1" title="AI Model">
+                                                    <span>🤖</span> {item.model.split('-')[1] || item.model}
+                                                </div>
+                                            )}
+                                            {item.creativity !== undefined && (
+                                                <div className="flex items-center gap-1" title="Creativity">
+                                                    <span>🎨</span> {item.creativity}%
+                                                </div>
+                                            )}
+                                            {item.intensity !== undefined && (
+                                                <div className="flex items-center gap-1" title="Intensity">
+                                                    <span>⚡</span> {item.intensity}/5
+                                                </div>
+                                            )}
+                                            {item.keywords_used && (
+                                                <div className="flex items-center gap-1" title="Keywords">
+                                                    <span>🔑</span> {item.keywords_used.length}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>

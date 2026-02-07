@@ -9,9 +9,11 @@ interface CapsuleBarProps {
     onOpenSettings: () => void;
     isGenerating: boolean;
     activeKeywords: { id: string; keyword: string; category: string; }[];
+    batchSize: number;
+    setBatchSize: (n: number) => void;
 }
 
-export function CapsuleBar({ topic, setTopic, onGenerate, isGenerating }: CapsuleBarProps) {
+export function CapsuleBar({ topic, setTopic, onGenerate, isGenerating, batchSize, setBatchSize }: CapsuleBarProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -36,6 +38,31 @@ export function CapsuleBar({ topic, setTopic, onGenerate, isGenerating }: Capsul
                     className="flex-1 bg-transparent text-sm text-white placeholder-gray-600 outline-none"
                     disabled={isGenerating}
                 />
+            </div>
+
+            {/* Batch Size Selector - Stepper */}
+            <div className="flex items-center bg-white/5 border border-white/5 rounded-xl px-2 h-12 gap-2 hover:border-white/10 transition-colors">
+                <span className="text-gray-500 text-xs uppercase tracking-wider font-bold ml-2 mr-1">Batch</span>
+
+                <div className="flex items-center bg-black/20 rounded-lg p-1">
+                    <button
+                        onClick={() => setBatchSize(Math.max(1, batchSize - 1))}
+                        disabled={batchSize <= 1 || isGenerating}
+                        className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-white/10 text-gray-400 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                    >
+                        -
+                    </button>
+                    <div className="w-8 text-center text-sm font-bold text-white font-mono">
+                        {batchSize}
+                    </div>
+                    <button
+                        onClick={() => setBatchSize(Math.max(1, batchSize + 1))} // Cap happens in parent or let it go higher
+                        disabled={batchSize >= 10 || isGenerating}
+                        className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-white/10 text-gray-400 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                    >
+                        +
+                    </button>
+                </div>
             </div>
 
             {/* Generate Button */}

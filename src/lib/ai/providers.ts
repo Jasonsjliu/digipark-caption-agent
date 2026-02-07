@@ -31,7 +31,10 @@ async function generateWithOpenAICompatible(
     variables: VariableSelections,
     counts: { tiktok: number; instagram: number; xiaohongshu: number },
     topic?: string,
-    isGrok: boolean = false
+    temperature: number = 0.9,
+    isGrok: boolean = false,
+    intensity: number = 3,
+    disabledDimensions: string[] = []
 ): Promise<{
     tiktok: GeneratedCaption[];
     instagram: GeneratedCaption[];
@@ -73,7 +76,7 @@ async function generateWithOpenAICompatible(
                 const requestParams: Parameters<typeof client.chat.completions.create>[0] = {
                     messages: [{ role: 'user', content: prompt }],
                     model: modelName,
-                    temperature: 0.9,
+                    temperature: temperature,
                     stream: false as const, // Ensure non-streaming for proper type inference
                 };
 
@@ -119,6 +122,10 @@ async function generateWithOpenAICompatible(
                     tags,
                     keywordsUsed: shuffledKeywords,
                     variablesUsed: filledVariables,
+                    model: modelName,
+                    creativity: Math.round(temperature * 100),
+                    intensity: intensity,
+                    keywordCount: shuffledKeywords.length
                 });
 
             } catch (error) {
@@ -137,28 +144,31 @@ export async function generateCaptions(
     keywords: string[],
     variables: VariableSelections,
     counts: { tiktok: number; instagram: number; xiaohongshu: number },
-    topic?: string
+    topic?: string,
+    temperature: number = 0.9,
+    intensity: number = 3,
+    disabledDimensions: string[] = []
 ) {
     console.log(`Generating with model: ${model}`);
 
     if (model === 'gemini-3-flash-preview' || model === 'gemini-2.0-flash-exp') {
-        return generateWithGemini(keywords, variables, counts, topic);
+        return generateWithGemini(keywords, variables, counts, topic, temperature, intensity, disabledDimensions);
     }
 
     if (model === 'gpt-4o') {
         const client = getOpenAIClient();
-        return generateWithOpenAICompatible('gpt-4o', client, keywords, variables, counts, topic);
+        return generateWithOpenAICompatible('gpt-4o', client, keywords, variables, counts, topic, temperature, false, intensity, disabledDimensions);
     }
 
     if (model === 'gpt-5-mini') {
         const client = getOpenAIClient();
         // Mapping "GPT-5 mini" to "gpt-4o-mini" as the closest current equivalent
-        return generateWithOpenAICompatible('gpt-4o-mini', client, keywords, variables, counts, topic);
+        return generateWithOpenAICompatible('gpt-4o-mini', client, keywords, variables, counts, topic, temperature, false, intensity, disabledDimensions);
     }
 
     if (model === 'grok-4-1-fast-non-reasoning') {
         const client = getGrokClient();
-        return generateWithOpenAICompatible('grok-4-1-fast-non-reasoning', client, keywords, variables, counts, topic, true);
+        return generateWithOpenAICompatible('grok-4-1-fast-non-reasoning', client, keywords, variables, counts, topic, temperature, true, intensity, disabledDimensions);
     }
 
     throw new Error(`Unsupported model: ${model}`);

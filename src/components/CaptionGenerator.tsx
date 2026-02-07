@@ -10,6 +10,8 @@ import { ModelSelector } from '@/components/ModelSelector';
 import { createClient } from '@/lib/supabase/client';
 import { loadKeywordsFromCloud, type CloudKeyword } from '@/lib/library-sync';
 import type { VariableSelections, GeneratedCaption, ModelType } from '@/types';
+import { BatchConfigModal } from '@/components/BatchConfigModal';
+import { PRESETS, getRandomOption, type PresetKey } from '@/lib/presets';
 
 // Storage key for history
 const STORAGE_KEY = 'dipark_history_v1';
@@ -23,7 +25,10 @@ export function CaptionGenerator() {
 
     const [model, setModel] = useState<ModelType>('gemini-3-flash-preview');
     const [variables, setVariables] = useState<VariableSelections>({});
+    const [disabledDimensions, setDisabledDimensions] = useState<string[]>([]);
+    const [pinnedDimensions, setPinnedDimensions] = useState<string[]>([]);
     const [counts, setCounts] = useState({ tiktok: 1, instagram: 1, xiaohongshu: 1 });
+    const [batchSize, setBatchSize] = useState(1);
     const [creativity, setCreativity] = useState(70);
     const [toneIntensity, setToneIntensity] = useState(3);
     const [isManualMode, setIsManualMode] = useState(false);
@@ -35,6 +40,16 @@ export function CaptionGenerator() {
 
     // Flag to prevent saving before initial load completes
     const [isInitialized, setIsInitialized] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+    // Batch Randomization State
+    const [isBatchConfigOpen, setIsBatchConfigOpen] = useState(false);
+    const [batchConfig, setBatchConfig] = useState({
+        randomizeModels: false,
+        randomizeCreativity: false,
+        randomizeKeywords: false,
+        randomizeVariables: false,
+    });
 
     const STORAGE_STATE_KEY = 'dipark_state_v1';
 
@@ -111,7 +126,11 @@ export function CaptionGenerator() {
             caption: c.caption,
             tags: c.tags,
             keywords_used: c.keywordsUsed,
-            variables_used: c.variablesUsed
+            variables_used: c.variablesUsed,
+            model: c.model,
+            creativity: c.creativity,
+            intensity: c.intensity,
+            keyword_count: c.keywordCount
         }));
 
         if (records.length > 0) {
@@ -119,36 +138,137 @@ export function CaptionGenerator() {
         }
     };
 
+    // --- Generation Handler ---
+    const onGenerateClick = () => {
+        if (batchSize > 1) {
+            setIsBatchConfigOpen(true);
+        } else {
+            handleGenerate();
+        }
+    };
+
     const handleGenerate = async () => {
-        setIsGenerating(true); setError(null);
+        setIsBatchConfigOpen(false);
+        setIsGenerating(true);
+        setError(null);
         try {
-            const payload = {
-                topic: topic || undefined,
-                variables, counts,
-                model,
-                temperature: creativity / 100, intensity: toneIntensity,
-                keywordCount: randomKeywordCount,
-                availableKeywords: !isManualMode ? availableKeywords.map(k => k.keyword) : undefined,
-                specificKeywords: isManualMode && activeKeywords.length > 0 ? activeKeywords.map(k => k.keyword) : undefined
-            };
+            // Create batch promises
+            const batchPromises = Array.from({ length: batchSize }).map(async (_, index) => {
 
-            console.log('[Frontend] Sending Generation Request:', payload);
+                // 1. Prepare Request Parameters (with Randomization)
 
-            const response = await fetch('/api/generate', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
+                // Model
+                let reqModel = model;
+                if (batchConfig.randomizeModels && batchSize > 1) {
+                    const models: ModelType[] = ['gemini-3-flash-preview', 'gemini-2.0-flash-exp', 'gpt-4o', 'gpt-5-mini', 'grok-4-1-fast-non-reasoning'];
+                    reqModel = models[Math.floor(Math.random() * models.length)];
+                }
+
+                // Creativity & Intensity
+                let reqCreativity = creativity;
+                let reqIntensity = toneIntensity;
+                if (batchConfig.randomizeCreativity && batchSize > 1) {
+                    reqCreativity = Math.floor(Math.random() * 101); // 0-100
+                    reqIntensity = Math.floor(Math.random() * 5) + 1; // 1-5
+                }
+
+                // Keywords Count
+                let reqKeywordCount = randomKeywordCount;
+                if (batchConfig.randomizeKeywords && batchSize > 1) {
+                    reqKeywordCount = Math.floor(Math.random() * 10) + 1; // 1-10
+                }
+
+                // Variables (Advanced Context)
+                let reqVariables = { ...variables };
+                if (batchConfig.randomizeVariables && batchSize > 1) {
+                    (Object.keys(PRESETS) as PresetKey[]).forEach(key => {
+                        // 1. Skip if dimension is disabled
+                        if (disabledDimensions.includes(key)) {
+                            return;
+                        }
+
+                        // 2. Skip if dimension is pinned (preserve user value)
+                        if (pinnedDimensions.includes(key) && reqVariables[key]) {
+                            return;
+                        }
+
+                        // 3. Otherwise randomize (even if currently selected, unless pinned)
+                        reqVariables[key] = getRandomOption(key);
+                    });
+                }
+
+                const payload = {
+                    topic: topic || undefined,
+                    variables: reqVariables,
+                    counts,
+                    model: reqModel,
+                    // Convert sliders to API params (0-1)
+                    temperature: reqCreativity / 100,
+                    intensity: reqIntensity, // 1-5
+                    keywordCount: reqKeywordCount,
+                    availableKeywords: !isManualMode ? availableKeywords.map(k => k.keyword) : [],
+                    specificKeywords: isManualMode ? activeKeywords.map(k => k.keyword) : [],
+                    disabledDimensions: disabledDimensions
+                };
+
+                console.log(`[Batch ${index + 1}] Sending Request...`, {
+                    model: reqModel,
+                    creativity: reqCreativity,
+                    keywords: reqKeywordCount,
+                    vars: Object.keys(reqVariables).length,
+                    disabled: disabledDimensions.length
+                });
+
+                try {
+                    const response = await fetch('/api/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    });
+
+                    const data = await response.json();
+                    if (!data.success) throw new Error(data.error || 'Generation failed');
+                    return data.data;
+                } catch (e) {
+                    console.error(`[Batch ${index + 1}] Failed:`, e);
+                    return null; // Return null on failure
+                }
             });
-            const data = await response.json();
-            if (!data.success) throw new Error(data.error || 'Generation failed');
-            setResults(data.data);
 
-            // Save all generated captions to cloud
-            const allCaptions = [...data.data.tiktok, ...data.data.instagram, ...data.data.xiaohongshu];
-            await saveToCloud(allCaptions);
+            // Wait for all requests
+            const rawResults = await Promise.all(batchPromises);
+            const results = rawResults.filter(r => r !== null); // Filter out failures
 
-            setTimeout(() => document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
-        } catch (err) { setError(err instanceof Error ? err.message : 'Generation failed'); }
-        finally { setIsGenerating(false); }
+            if (results.length === 0) {
+                throw new Error('All batch generations failed. Please check API keys and settings.');
+            }
+
+            if (results.length < batchSize) {
+                // Optional: Notify usage that some failed?
+                console.warn(`${batchSize - results.length} generations failed.`);
+            }
+
+            // Aggregate results
+            const aggregated = results.reduce((acc, curr) => ({
+                tiktok: [...acc.tiktok, ...curr.tiktok],
+                instagram: [...acc.instagram, ...curr.instagram],
+                xiaohongshu: [...acc.xiaohongshu, ...curr.xiaohongshu]
+            }), { tiktok: [], instagram: [], xiaohongshu: [] });
+
+            setResults(aggregated);
+
+            // Scroll to results
+            setTimeout(() => {
+                const resultsElement = document.getElementById('results-section');
+                if (resultsElement) resultsElement.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message || 'An error occurred during generation');
+        } finally {
+            setIsGenerating(false);
+        }
     };
 
     return (
@@ -160,11 +280,14 @@ export function CaptionGenerator() {
                 {/* 1. The Capsule Input */}
                 <div className="mb-10 relative z-20">
                     <CapsuleBar
-                        topic={topic} setTopic={setTopic}
-                        onGenerate={handleGenerate}
-                        onOpenSettings={() => { }}
+                        topic={topic}
+                        setTopic={setTopic}
+                        onGenerate={onGenerateClick}
+                        onOpenSettings={() => setIsSettingsOpen(true)}
                         isGenerating={isGenerating}
-                        activeKeywords={[]}
+                        activeKeywords={activeKeywords}
+                        batchSize={batchSize}
+                        setBatchSize={setBatchSize}
                     />
                 </div>
 
@@ -286,7 +409,12 @@ export function CaptionGenerator() {
                                     Reset All
                                 </button>
                             </div>
-                            <VariableSelector value={variables} onChange={setVariables} />
+                            <VariableSelector
+                                value={variables}
+                                onChange={setVariables}
+                                onDisabledChange={(disabledSet) => setDisabledDimensions(Array.from(disabledSet) as string[])}
+                                onPinnedChange={(pinnedSet) => setPinnedDimensions(Array.from(pinnedSet) as string[])}
+                            />
                         </div>
                     </div>
                 </div>
@@ -296,6 +424,15 @@ export function CaptionGenerator() {
             </div>
 
             {error && <div className="text-center text-red-300 bg-red-500/10 p-4 rounded-xl border border-red-500/20">⚠️ {error}</div>}
+
+            <BatchConfigModal
+                isOpen={isBatchConfigOpen}
+                onClose={() => setIsBatchConfigOpen(false)}
+                onConfirm={handleGenerate}
+                config={batchConfig}
+                setConfig={setBatchConfig}
+                batchSize={batchSize}
+            />
 
             {(results.tiktok.length > 0 || results.instagram.length > 0 || results.xiaohongshu.length > 0) && (
                 <div id="results-section" className="animate-fade-in pb-20 pt-4">
