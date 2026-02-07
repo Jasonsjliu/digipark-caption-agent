@@ -273,6 +273,14 @@ export function CaptionGenerator() {
 
             setResults(aggregated);
 
+            // Save to cloud history - flatten all platforms into a single array
+            const allCaptions: GeneratedCaption[] = [
+                ...aggregated.tiktok.map((c: any) => ({ ...c, platform: 'tiktok' })),
+                ...aggregated.instagram.map((c: any) => ({ ...c, platform: 'instagram' })),
+                ...aggregated.xiaohongshu.map((c: any) => ({ ...c, platform: 'xiaohongshu' }))
+            ];
+            saveToCloud(allCaptions);
+
             // Scroll to results
             setTimeout(() => {
                 const resultsElement = document.getElementById('results-section');
