@@ -120,12 +120,22 @@ export function CaptionGenerator() {
 
     // Save to cloud history
     const saveToCloud = async (captions: GeneratedCaption[]) => {
+        console.log('[History] saveToCloud called with', captions.length, 'captions');
+
         // Get current user
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError) {
+            console.error('[History] Session error:', sessionError);
+            return;
+        }
+
         const userId = session?.user?.id;
+        console.log('[History] User ID:', userId);
+        console.log('[History] User email:', session?.user?.email);
 
         if (!userId) {
-            console.warn('Cannot save history: User not logged in');
+            console.warn('[History] Cannot save history: User not logged in');
             return;
         }
 
@@ -143,11 +153,15 @@ export function CaptionGenerator() {
             keyword_count: c.keywordCount
         }));
 
+        console.log('[History] Inserting', records.length, 'records...');
+        console.log('[History] First record sample:', JSON.stringify(records[0], null, 2));
+
         if (records.length > 0) {
-            const { error } = await supabase.from('generation_history').insert(records);
+            const { data, error } = await supabase.from('generation_history').insert(records).select();
             if (error) {
-                console.error('Failed to save history:', error);
+                console.error('[History] Failed to save:', error.message, error.details, error.hint);
             } else {
+                console.log('[History] Successfully saved!', data?.length, 'records');
                 // Dispatch event to refresh history panel
                 window.dispatchEvent(new CustomEvent('history-updated'));
             }
