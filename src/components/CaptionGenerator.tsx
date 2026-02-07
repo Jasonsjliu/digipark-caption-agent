@@ -120,7 +120,17 @@ export function CaptionGenerator() {
 
     // Save to cloud history
     const saveToCloud = async (captions: GeneratedCaption[]) => {
+        // Get current user
+        const { data: { session } } = await supabase.auth.getSession();
+        const userId = session?.user?.id;
+
+        if (!userId) {
+            console.warn('Cannot save history: User not logged in');
+            return;
+        }
+
         const records = captions.map(c => ({
+            user_id: userId, // Explicitly set user_id
             topic: topic || null,
             platform: c.platform,
             caption: c.caption,
@@ -134,7 +144,10 @@ export function CaptionGenerator() {
         }));
 
         if (records.length > 0) {
-            await supabase.from('generation_history').insert(records);
+            const { error } = await supabase.from('generation_history').insert(records);
+            if (error) {
+                console.error('Failed to save history:', error);
+            }
         }
     };
 

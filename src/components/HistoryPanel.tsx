@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { GeneratedCaption } from '@/types';
+import type { User } from '@supabase/supabase-js';
 
 interface HistoryItem {
     id: string;
@@ -24,12 +25,19 @@ export function HistoryPanel() {
     const [isLoading, setIsLoading] = useState(true);
     const [filter, setFilter] = useState<string>('all');
     const [searchQuery, setSearchQuery] = useState('');
+    const [user, setUser] = useState<User | null>(null);
     const supabase = createClient();
 
     // Fetch history on mount
     useEffect(() => {
+        checkUser();
         fetchHistory();
     }, []);
+
+    const checkUser = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+    };
 
     const fetchHistory = async () => {
         setIsLoading(true);
@@ -86,7 +94,10 @@ export function HistoryPanel() {
     return (
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-white">Generation History</h2>
+                <div className="flex items-center gap-3">
+                    <h2 className="text-lg font-semibold text-white">Generation History</h2>
+                    {user && <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-mono">{user.email}</span>}
+                </div>
                 <button onClick={fetchHistory} className="text-xs text-gray-500 hover:text-white transition-colors">
                     🔄 Refresh
                 </button>
