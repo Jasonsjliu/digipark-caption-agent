@@ -50,9 +50,18 @@ export function HistoryPanel() {
 
     const fetchHistory = async () => {
         setIsLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            setHistory([]);
+            setIsLoading(false);
+            return;
+        }
+
         const { data, error } = await supabase
             .from('generation_history')
             .select('*')
+            .eq('user_id', user.id) // Filter by user_id
             .order('created_at', { ascending: false })
             .limit(100);
 
@@ -66,10 +75,14 @@ export function HistoryPanel() {
         e.stopPropagation(); // Prevent opening modal
         if (!confirm('Are you sure you want to delete this item?')) return;
 
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
         const { error } = await supabase
             .from('generation_history')
             .delete()
-            .eq('id', id);
+            .eq('id', id)
+            .eq('user_id', user.id); // Ensure user owns the item
 
         if (!error) {
             setHistory(history.filter(h => h.id !== id));

@@ -18,7 +18,8 @@ export function fillVariables(partial: VariableSelections, disabledDimensions: s
             continue;
         }
 
-        if (!filled[key] || filled[key] === 'random') {
+        // Only fill if explicitly set to 'random'
+        if (filled[key] === 'random') {
             filled[key] = getRandomOption(key);
         }
     }
