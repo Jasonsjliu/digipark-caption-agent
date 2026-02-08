@@ -311,10 +311,11 @@ async function generateSingleCaption(
     topic?: string,
     temperature: number = 0.9,
     intensity: number = 3,
-    disabledDimensions: string[] = []
+    disabledDimensions: string[] = [],
+    modelName: string = 'gemini-3-flash-preview'
 ): Promise<GeneratedCaption> {
     const model = genAI.getGenerativeModel({
-        model: 'gemini-3-flash-preview',
+        model: modelName,
         generationConfig: {
             temperature: temperature,
             topP: 0.95,
@@ -375,7 +376,7 @@ async function generateSingleCaption(
         tags,
         keywordsUsed: keywords,
         variablesUsed: filteredVariablesUsed,
-        model: 'gemini-3-flash-preview',
+        model: modelName,
         creativity: Math.round(temperature * 100),
         intensity: intensity,
         keywordCount: keywords.length
@@ -390,7 +391,8 @@ export async function generateWithGemini(
     topic?: string,
     temperature: number = 0.9,
     intensity: number = 3,
-    disabledDimensions: string[] = []
+    disabledDimensions: string[] = [],
+    modelName: string = 'gemini-3-flash-preview'
 ): Promise<{
     tiktok: GeneratedCaption[];
     instagram: GeneratedCaption[];
@@ -414,7 +416,7 @@ export async function generateWithGemini(
             const filledVariables = fillVariables(variables, disabledDimensions);
 
             try {
-                const caption = await generateSingleCaption(platform, shuffledKeywords, filledVariables, topic, temperature, intensity, disabledDimensions);
+                const caption = await generateSingleCaption(platform, shuffledKeywords, filledVariables, topic, temperature, intensity, disabledDimensions, modelName);
                 results[platform].push(caption);
             } catch (error) {
                 console.error(`Error generating ${platform} caption:`, error);

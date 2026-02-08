@@ -190,7 +190,7 @@ export function CaptionGenerator() {
                 // Model
                 let reqModel = model;
                 if (batchConfig.randomizeModels && batchSize > 1) {
-                    const models: ModelType[] = ['gemini-3-flash-preview', 'gemini-2.0-flash-exp', 'gpt-4o', 'gpt-5-mini', 'grok-4-1-fast-non-reasoning'];
+                    const models: ModelType[] = ['gemini-3-flash-preview', 'gpt-4o', 'gpt-5-mini', 'grok-4-1-fast-non-reasoning'];
                     reqModel = models[Math.floor(Math.random() * models.length)];
                 }
 

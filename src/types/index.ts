@@ -53,7 +53,7 @@ export interface VariableSelections {
     trendElements?: string | string[];
 }
 
-export type ModelType = 'gemini-3-flash-preview' | 'gemini-2.0-flash-exp' | 'gpt-4o' | 'gpt-5-mini' | 'grok-4-1-fast-non-reasoning';
+export type ModelType = 'gemini-3-flash-preview' | 'gpt-4o' | 'gpt-5-mini' | 'grok-4-1-fast-non-reasoning';
 
 export interface GenerationConfig {
     topic?: string;
