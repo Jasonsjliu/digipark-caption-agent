@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
             selectedKeywords = shuffled.slice(0, Math.min(keywordCount, shuffled.length));
         }
 
+        const apiKey = process.env.GEMINI_API_KEY;
         console.log('[API] Generation Request:', {
             model,
             topic,
@@ -40,9 +41,13 @@ export async function POST(request: NextRequest) {
             variables,
             selectedKeywords,
             disabledCount: disabledDimensions?.length || 0,
-            hasApiKey: !!process.env.GEMINI_API_KEY,
-            apiKeyPrefix: process.env.GEMINI_API_KEY?.substring(0, 5)
+            hasGeminiKey: !!apiKey,
+            keyPrefix: apiKey ? apiKey.substring(0, 4) + '...' : 'NONE'
         });
+
+        if (!apiKey) {
+            throw new Error('GEMINI_API_KEY is missing via process.env');
+        }
 
         // Generate captions
         const result = await generateCaptions(model, selectedKeywords, variables, counts, topic, body.temperature, body.intensity, disabledDimensions);

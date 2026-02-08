@@ -322,6 +322,8 @@ async function generateSingleCaption(
         }
     });
 
+    console.log(`[Gemini] Generating for ${platform} with model ${modelName}...`);
+
     let prompt: string;
     switch (platform) {
         case 'tiktok':
@@ -335,79 +337,61 @@ async function generateSingleCaption(
             break;
     }
 
-    console.log(`[Gemini] Generating content with model: ${modelName}`);
-    console.log(`[Gemini] Configuration: temperature=${temperature}`);
-
-    // Log the beginning of the prompt for verification
-    console.log(`[Gemini] Prompt start: ${prompt.substring(0, 100)}...`);
-
-    let result;
     try {
-        result = await model.generateContent(prompt);
-        console.log(`[Gemini] Generation complete. Valid response? ${!!result.response}`);
-    } catch (e) {
-        console.error(`[Gemini] Error with ${modelName}:`, e);
-        // Fallback to stable model if preview fails
-        if (modelName === 'gemini-3-flash-preview') {
-            console.log('[Gemini] Falling back to gemini-1.5-flash...');
-            const fallbackModel = genAI.getGenerativeModel({
-                model: 'gemini-1.5-flash',
-                generationConfig: {
-                    temperature: temperature,
-                    topP: 0.95,
-                }
-            });
-            result = await fallbackModel.generateContent(prompt);
-            console.log(`[Gemini] Fallback generation complete.`);
-        } else {
-            throw e;
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+        console.log(`[Gemini] ${platform} response received (length: ${responseText.length})`);
+
+        // Parse JSON from response (handle potential markdown code blocks)
+        let jsonStr = responseText;
+        const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (jsonMatch) {
+            jsonStr = jsonMatch[1];
         }
+
+        const parsed = JSON.parse(jsonStr.trim());
+
+        // Format tags based on platform
+        let tags: string[];
+        if (platform === 'tiktok' && parsed.tags && typeof parsed.tags === 'object' && !Array.isArray(parsed.tags)) {
+            const tiktokTags = parsed.tags as TikTokTags;
+            tags = [
+                tiktokTags.audience,
+                tiktokTags.vertical,
+                tiktokTags.result,
+                tiktokTags.action,
+                tiktokTags.broadTraffic,
+            ];
+        } else {
+            tags = parsed.tags || [];
+        }
+
+        // Filter out disabled dimensions from variablesUsed
+        const filteredVariablesUsed: VariableSelections = {};
+        for (const [key, value] of Object.entries(variables)) {
+            if (disabledDimensions.includes(key)) continue;
+            if (value === undefined || value === null || value === '') continue;
+            filteredVariablesUsed[key as keyof VariableSelections] = value;
+        }
+
+        return {
+            platform,
+            caption: parsed.caption,
+            tags,
+            keywordsUsed: keywords,
+            variablesUsed: filteredVariablesUsed,
+            model: modelName,
+            creativity: Math.round(temperature * 100),
+            intensity: intensity,
+            keywordCount: keywords.length
+        };
+    } catch (e: any) {
+        console.error(`[Gemini] Failed to generate for ${platform}:`, e.message || e);
+        if (e.response) {
+            console.error(`[Gemini] Error Response blocked: ${e.response.promptFeedback?.blockReason}`);
+        }
+        throw e;
     }
-    const responseText = result.response.text();
-
-    // Parse JSON from response (handle potential markdown code blocks)
-    let jsonStr = responseText;
-    const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-        jsonStr = jsonMatch[1];
-    }
-
-    const parsed = JSON.parse(jsonStr.trim());
-
-    // Format tags based on platform
-    let tags: string[];
-    if (platform === 'tiktok' && parsed.tags && typeof parsed.tags === 'object' && !Array.isArray(parsed.tags)) {
-        const tiktokTags = parsed.tags as TikTokTags;
-        tags = [
-            tiktokTags.audience,
-            tiktokTags.vertical,
-            tiktokTags.result,
-            tiktokTags.action,
-            tiktokTags.broadTraffic,
-        ];
-    } else {
-        tags = parsed.tags || [];
-    }
-
-    // Filter out disabled dimensions from variablesUsed
-    const filteredVariablesUsed: VariableSelections = {};
-    for (const [key, value] of Object.entries(variables)) {
-        if (disabledDimensions.includes(key)) continue;
-        if (value === undefined || value === null || value === '') continue;
-        filteredVariablesUsed[key as keyof VariableSelections] = value;
-    }
-
-    return {
-        platform,
-        caption: parsed.caption,
-        tags,
-        keywordsUsed: keywords,
-        variablesUsed: filteredVariablesUsed,
-        model: modelName,
-        creativity: Math.round(temperature * 100),
-        intensity: intensity,
-        keywordCount: keywords.length
-    };
 }
 
 // Main generation function

@@ -159,7 +159,7 @@ export async function generateCaptions(
 ) {
     console.log(`Generating with model: ${model}`);
 
-    if (model === 'gemini-3-flash-preview') {
+    if (model === 'gemini-3-flash-preview' || model === 'gemini-2.0-flash-exp' as any) {
         return generateWithGemini(keywords, variables, counts, topic, temperature, intensity, disabledDimensions, 'gemini-3-flash-preview');
     }
 
