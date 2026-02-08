@@ -335,7 +335,34 @@ async function generateSingleCaption(
             break;
     }
 
-    const result = await model.generateContent(prompt);
+    console.log(`[Gemini] Generating content with model: ${modelName}`);
+    console.log(`[Gemini] Configuration: temperature=${temperature}`);
+
+    // Log the beginning of the prompt for verification
+    console.log(`[Gemini] Prompt start: ${prompt.substring(0, 100)}...`);
+
+    let result;
+    try {
+        result = await model.generateContent(prompt);
+        console.log(`[Gemini] Generation complete. Valid response? ${!!result.response}`);
+    } catch (e) {
+        console.error(`[Gemini] Error with ${modelName}:`, e);
+        // Fallback to stable model if preview fails
+        if (modelName === 'gemini-3-flash-preview') {
+            console.log('[Gemini] Falling back to gemini-1.5-flash...');
+            const fallbackModel = genAI.getGenerativeModel({
+                model: 'gemini-1.5-flash',
+                generationConfig: {
+                    temperature: temperature,
+                    topP: 0.95,
+                }
+            });
+            result = await fallbackModel.generateContent(prompt);
+            console.log(`[Gemini] Fallback generation complete.`);
+        } else {
+            throw e;
+        }
+    }
     const responseText = result.response.text();
 
     // Parse JSON from response (handle potential markdown code blocks)

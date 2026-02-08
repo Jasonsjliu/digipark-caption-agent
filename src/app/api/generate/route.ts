@@ -39,7 +39,9 @@ export async function POST(request: NextRequest) {
             variableCount: Object.keys(variables).length,
             variables,
             selectedKeywords,
-            disabledCount: disabledDimensions?.length || 0
+            disabledCount: disabledDimensions?.length || 0,
+            hasApiKey: !!process.env.GEMINI_API_KEY,
+            apiKeyPrefix: process.env.GEMINI_API_KEY?.substring(0, 5)
         });
 
         // Generate captions
