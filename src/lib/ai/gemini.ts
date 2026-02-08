@@ -12,8 +12,9 @@ export function fillVariables(partial: VariableSelections, disabledDimensions: s
     const presetKeys = Object.keys(PRESETS) as (keyof typeof PRESETS)[];
 
     for (const key of presetKeys) {
-        // Skip explicitly disabled dimensions
+        // Remove explicitly disabled dimensions from the result
         if (disabledDimensions.includes(key)) {
+            delete filled[key];
             continue;
         }
 
@@ -360,12 +361,20 @@ async function generateSingleCaption(
         tags = parsed.tags || [];
     }
 
+    // Filter out disabled dimensions from variablesUsed
+    const filteredVariablesUsed: VariableSelections = {};
+    for (const [key, value] of Object.entries(variables)) {
+        if (disabledDimensions.includes(key)) continue;
+        if (value === undefined || value === null || value === '') continue;
+        filteredVariablesUsed[key as keyof VariableSelections] = value;
+    }
+
     return {
         platform,
         caption: parsed.caption,
         tags,
         keywordsUsed: keywords,
-        variablesUsed: variables,
+        variablesUsed: filteredVariablesUsed,
         model: 'gemini-3-flash-preview',
         creativity: Math.round(temperature * 100),
         intensity: intensity,

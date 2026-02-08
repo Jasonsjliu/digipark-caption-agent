@@ -116,12 +116,20 @@ async function generateWithOpenAICompatible(
                     tags = parsed.tags || [];
                 }
 
+                // Filter out disabled dimensions from variablesUsed
+                const filteredVariablesUsed: typeof filledVariables = {};
+                for (const [key, value] of Object.entries(filledVariables)) {
+                    if (disabledDimensions.includes(key)) continue;
+                    if (value === undefined || value === null || value === '') continue;
+                    filteredVariablesUsed[key as keyof typeof filledVariables] = value;
+                }
+
                 results[platform].push({
                     platform,
                     caption: parsed.caption,
                     tags,
                     keywordsUsed: shuffledKeywords,
-                    variablesUsed: filledVariables,
+                    variablesUsed: filteredVariablesUsed,
                     model: modelName,
                     creativity: Math.round(temperature * 100),
                     intensity: intensity,
