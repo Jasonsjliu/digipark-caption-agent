@@ -32,7 +32,7 @@ export function CaptionGenerator() {
     const [creativity, setCreativity] = useState(70);
     const [toneIntensity, setToneIntensity] = useState(3);
     const [isManualMode, setIsManualMode] = useState(false);
-    const [randomKeywordCount, setRandomKeywordCount] = useState(5);
+    const [randomKeywordCount, setRandomKeywordCount] = useState(0);
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [results, setResults] = useState<{ tiktok: GeneratedCaption[]; instagram: GeneratedCaption[]; xiaohongshu: GeneratedCaption[]; }>({ tiktok: [], instagram: [], xiaohongshu: [] });

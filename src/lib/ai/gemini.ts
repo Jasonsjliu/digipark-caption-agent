@@ -18,8 +18,7 @@ export function fillVariables(partial: VariableSelections, disabledDimensions: s
             continue;
         }
 
-        // Fill missing values with random options (restores previous behavior)
-        if (!filled[key] || filled[key] === 'random') {
+        if (filled[key] === 'random') {
             filled[key] = getRandomOption(key);
         }
     }
