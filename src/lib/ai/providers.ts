@@ -54,18 +54,18 @@ async function generateWithOpenAICompatible(
         const count = counts[platform];
         for (let i = 0; i < count; i++) {
             const shuffledKeywords = [...keywords].sort(() => Math.random() - 0.5);
-            const filledVariables = fillVariables(variables);
+            const filledVariables = fillVariables(variables, disabledDimensions);
 
             let prompt: string = '';
             switch (platform) {
                 case 'tiktok':
-                    prompt = buildTikTokPrompt(shuffledKeywords, filledVariables, topic);
+                    prompt = buildTikTokPrompt(shuffledKeywords, filledVariables, topic, disabledDimensions);
                     break;
                 case 'instagram':
-                    prompt = buildInstagramPrompt(shuffledKeywords, filledVariables, topic);
+                    prompt = buildInstagramPrompt(shuffledKeywords, filledVariables, topic, disabledDimensions);
                     break;
                 case 'xiaohongshu':
-                    prompt = buildXiaohongshuPrompt(shuffledKeywords, filledVariables, topic);
+                    prompt = buildXiaohongshuPrompt(shuffledKeywords, filledVariables, topic, disabledDimensions);
                     break;
             }
 

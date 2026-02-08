@@ -55,9 +55,22 @@ TONE: Exciting, imaginative, warm, inviting - like a friend sharing an incredibl
 export function buildTikTokPrompt(
     keywords: string[],
     variables: VariableSelections,
-    topic?: string
+    topic?: string,
+    disabledDimensions: string[] = []
 ): string {
-    const variableDescriptions = Object.entries(variables)
+    // Filter out disabled dimensions from variables
+    const filteredVariables: VariableSelections = {};
+    for (const [key, value] of Object.entries(variables)) {
+        // Skip disabled dimensions
+        if (disabledDimensions.includes(key)) continue;
+        // Skip undefined/null/empty values
+        if (value === undefined || value === null || value === '') continue;
+        // Skip arrays that are empty
+        if (Array.isArray(value) && value.length === 0) continue;
+        filteredVariables[key as keyof VariableSelections] = value;
+    }
+    const variables_clean = filteredVariables;
+    const variableDescriptions = Object.entries(variables_clean)
         .map(([key, value]) => {
             if (Array.isArray(value)) {
                 // @ts-ignore
@@ -86,32 +99,32 @@ KEYWORDS TO INCORPORATE: ${keywords.join(', ')}
 ${topic ? `TOPIC/THEME: ${topic}` : ''}
 
 STYLE & TONE:
-${Array.isArray(variables.tone) ? `- Tone: ${variables.tone.map(v => getVariableLabel('tone', v, 'en')).join(', ')}` : variables.tone ? `- Tone: ${getVariableLabel('tone', variables.tone, 'en')}` : ''}
-${Array.isArray(variables.writingStyle) ? `- Writing Style: ${variables.writingStyle.map(v => getVariableLabel('writingStyle', v, 'en')).join(', ')}` : variables.writingStyle ? `- Writing Style: ${getVariableLabel('writingStyle', variables.writingStyle, 'en')}` : ''}
-${Array.isArray(variables.perspective) ? `- Perspective: ${variables.perspective.map(v => getVariableLabel('perspective', v, 'en')).join(', ')}` : variables.perspective ? `- Perspective: ${getVariableLabel('perspective', variables.perspective, 'en')}` : ''}
-${Array.isArray(variables.emotionalAppeal) ? `- Emotion: ${variables.emotionalAppeal.map(v => getVariableLabel('emotionalAppeal', v, 'en')).join(', ')}` : variables.emotionalAppeal ? `- Emotion: ${getVariableLabel('emotionalAppeal', variables.emotionalAppeal, 'en')}` : ''}
-${Array.isArray(variables.paces) ? `- Paces: ${variables.paces.map(v => getVariableLabel('paces', v, 'en')).join(', ')}` : variables.paces ? `- Paces: ${getVariableLabel('paces', variables.paces, 'en')}` : ''}
-${Array.isArray(variables.valueProposition) ? `- Value Prop: ${variables.valueProposition.map(v => getVariableLabel('valueProposition', v, 'en')).join(', ')}` : variables.valueProposition ? `- Value Prop: ${getVariableLabel('valueProposition', variables.valueProposition, 'en')}` : ''}
+${Array.isArray(variables_clean.tone) ? `- Tone: ${variables_clean.tone.map(v => getVariableLabel('tone', v, 'en')).join(', ')}` : variables_clean.tone ? `- Tone: ${getVariableLabel('tone', variables_clean.tone, 'en')}` : ''}
+${Array.isArray(variables_clean.writingStyle) ? `- Writing Style: ${variables_clean.writingStyle.map(v => getVariableLabel('writingStyle', v, 'en')).join(', ')}` : variables_clean.writingStyle ? `- Writing Style: ${getVariableLabel('writingStyle', variables_clean.writingStyle, 'en')}` : ''}
+${Array.isArray(variables_clean.perspective) ? `- Perspective: ${variables_clean.perspective.map(v => getVariableLabel('perspective', v, 'en')).join(', ')}` : variables_clean.perspective ? `- Perspective: ${getVariableLabel('perspective', variables_clean.perspective, 'en')}` : ''}
+${Array.isArray(variables_clean.emotionalAppeal) ? `- Emotion: ${variables_clean.emotionalAppeal.map(v => getVariableLabel('emotionalAppeal', v, 'en')).join(', ')}` : variables_clean.emotionalAppeal ? `- Emotion: ${getVariableLabel('emotionalAppeal', variables_clean.emotionalAppeal, 'en')}` : ''}
+${Array.isArray(variables_clean.paces) ? `- Paces: ${variables_clean.paces.map(v => getVariableLabel('paces', v, 'en')).join(', ')}` : variables_clean.paces ? `- Paces: ${getVariableLabel('paces', variables_clean.paces, 'en')}` : ''}
+${Array.isArray(variables_clean.valueProposition) ? `- Value Prop: ${variables_clean.valueProposition.map(v => getVariableLabel('valueProposition', v, 'en')).join(', ')}` : variables_clean.valueProposition ? `- Value Prop: ${getVariableLabel('valueProposition', variables_clean.valueProposition, 'en')}` : ''}
 
 HOOK STRATEGY:
-${Array.isArray(variables.hookType) ? `- Hook Type: ${variables.hookType.map(v => getVariableLabel('hookType', v, 'en')).join(', ')}` : variables.hookType ? `- Hook Type: ${getVariableLabel('hookType', variables.hookType, 'en')}` : ''}
-${Array.isArray(variables.openingTemplate) ? `- Opening: ${variables.openingTemplate.map(v => getVariableLabel('openingTemplate', v, 'en')).join(', ')}` : variables.openingTemplate ? `- Opening: ${getVariableLabel('openingTemplate', variables.openingTemplate, 'en')}` : ''}
+${Array.isArray(variables_clean.hookType) ? `- Hook Type: ${variables_clean.hookType.map(v => getVariableLabel('hookType', v, 'en')).join(', ')}` : variables_clean.hookType ? `- Hook Type: ${getVariableLabel('hookType', variables_clean.hookType, 'en')}` : ''}
+${Array.isArray(variables_clean.openingTemplate) ? `- Opening: ${variables_clean.openingTemplate.map(v => getVariableLabel('openingTemplate', v, 'en')).join(', ')}` : variables_clean.openingTemplate ? `- Opening: ${getVariableLabel('openingTemplate', variables_clean.openingTemplate, 'en')}` : ''}
 
 CONTENT ANGLE:
-${Array.isArray(variables.contentFramework) ? `- Framework: ${variables.contentFramework.map(v => getVariableLabel('contentFramework', v, 'en')).join(', ')}` : variables.contentFramework ? `- Framework: ${getVariableLabel('contentFramework', variables.contentFramework, 'en')}` : ''}
-${Array.isArray(variables.targetAudience) ? `- Audience: ${variables.targetAudience.map(v => getVariableLabel('targetAudience', v, 'en')).join(', ')}` : variables.targetAudience ? `- Audience: ${getVariableLabel('targetAudience', variables.targetAudience, 'en')}` : ''}
+${Array.isArray(variables_clean.contentFramework) ? `- Framework: ${variables_clean.contentFramework.map(v => getVariableLabel('contentFramework', v, 'en')).join(', ')}` : variables_clean.contentFramework ? `- Framework: ${getVariableLabel('contentFramework', variables_clean.contentFramework, 'en')}` : ''}
+${Array.isArray(variables_clean.targetAudience) ? `- Audience: ${variables_clean.targetAudience.map(v => getVariableLabel('targetAudience', v, 'en')).join(', ')}` : variables_clean.targetAudience ? `- Audience: ${getVariableLabel('targetAudience', variables_clean.targetAudience, 'en')}` : ''}
 
 STRUCTURE & FORMAT:
-${variables.captionLength ? `- Length: ${Array.isArray(variables.captionLength) ? variables.captionLength.map(v => getVariableLabel('captionLength', v, 'en')).join(', ') : getVariableLabel('captionLength', variables.captionLength, 'en')}` : ''}
-${variables.emojiStyle ? `- Emoji: ${Array.isArray(variables.emojiStyle) ? variables.emojiStyle.map(v => getVariableLabel('emojiStyle', v, 'en')).join(', ') : getVariableLabel('emojiStyle', variables.emojiStyle, 'en')}` : ''}
-${Array.isArray(variables.paragraphStructure) ? `- Paragraphs: ${variables.paragraphStructure.map(v => getVariableLabel('paragraphStructure', v, 'en')).join(', ')}` : variables.paragraphStructure ? `- Paragraphs: ${getVariableLabel('paragraphStructure', variables.paragraphStructure, 'en')}` : ''}
+${variables_clean.captionLength ? `- Length: ${Array.isArray(variables_clean.captionLength) ? variables_clean.captionLength.map(v => getVariableLabel('captionLength', v, 'en')).join(', ') : getVariableLabel('captionLength', variables_clean.captionLength, 'en')}` : ''}
+${variables_clean.emojiStyle ? `- Emoji: ${Array.isArray(variables_clean.emojiStyle) ? variables_clean.emojiStyle.map(v => getVariableLabel('emojiStyle', v, 'en')).join(', ') : getVariableLabel('emojiStyle', variables_clean.emojiStyle, 'en')}` : ''}
+${Array.isArray(variables_clean.paragraphStructure) ? `- Paragraphs: ${variables_clean.paragraphStructure.map(v => getVariableLabel('paragraphStructure', v, 'en')).join(', ')}` : variables_clean.paragraphStructure ? `- Paragraphs: ${getVariableLabel('paragraphStructure', variables_clean.paragraphStructure, 'en')}` : ''}
 
 CALL TO ACTION:
-${Array.isArray(variables.ctaTone) ? `- CTA Tone: ${variables.ctaTone.map(v => getVariableLabel('ctaTone', v, 'en')).join(', ')}` : variables.ctaTone ? `- CTA Tone: ${getVariableLabel('ctaTone', variables.ctaTone, 'en')}` : ''}
+${Array.isArray(variables_clean.ctaTone) ? `- CTA Tone: ${variables_clean.ctaTone.map(v => getVariableLabel('ctaTone', v, 'en')).join(', ')}` : variables_clean.ctaTone ? `- CTA Tone: ${getVariableLabel('ctaTone', variables_clean.ctaTone, 'en')}` : ''}
 
 TIMING & TRENDS:
-${Array.isArray(variables.timeliness) ? `- Timeliness: ${variables.timeliness.map(v => getVariableLabel('timeliness', v, 'en')).join(', ')}` : variables.timeliness ? `- Timeliness: ${getVariableLabel('timeliness', variables.timeliness, 'en')}` : ''}
-${Array.isArray(variables.trendElements) ? `- Trends: ${variables.trendElements.map(v => getVariableLabel('trendElements', v, 'en')).join(', ')}` : variables.trendElements ? `- Trends: ${getVariableLabel('trendElements', variables.trendElements, 'en')}` : ''}
+${Array.isArray(variables_clean.timeliness) ? `- Timeliness: ${variables_clean.timeliness.map(v => getVariableLabel('timeliness', v, 'en')).join(', ')}` : variables_clean.timeliness ? `- Timeliness: ${getVariableLabel('timeliness', variables_clean.timeliness, 'en')}` : ''}
+${Array.isArray(variables_clean.trendElements) ? `- Trends: ${variables_clean.trendElements.map(v => getVariableLabel('trendElements', v, 'en')).join(', ')}` : variables_clean.trendElements ? `- Trends: ${getVariableLabel('trendElements', variables_clean.trendElements, 'en')}` : ''}
 
 TAG REQUIREMENTS:
 Generate exactly 5 hashtags, one for each category:
@@ -141,9 +154,22 @@ OUTPUT FORMAT (JSON only, no markdown):
 export function buildInstagramPrompt(
     keywords: string[],
     variables: VariableSelections,
-    topic?: string
+    topic?: string,
+    disabledDimensions: string[] = []
 ): string {
-    const variableDescriptions = Object.entries(variables)
+    // Filter out disabled dimensions from variables
+    const filteredVariables: VariableSelections = {};
+    for (const [key, value] of Object.entries(variables)) {
+        // Skip disabled dimensions
+        if (disabledDimensions.includes(key)) continue;
+        // Skip undefined/null/empty values
+        if (value === undefined || value === null || value === '') continue;
+        // Skip arrays that are empty
+        if (Array.isArray(value) && value.length === 0) continue;
+        filteredVariables[key as keyof VariableSelections] = value;
+    }
+    const variables_clean = filteredVariables;
+    const variableDescriptions = Object.entries(variables_clean)
         .map(([key, value]) => {
             // @ts-ignore
             if (Array.isArray(value)) {
@@ -173,32 +199,32 @@ KEYWORDS TO INCORPORATE: ${keywords.join(', ')}
 ${topic ? `TOPIC/THEME: ${topic}` : ''}
 
 STYLE & TONE:
-${Array.isArray(variables.tone) ? `- Tone: ${variables.tone.map(v => getVariableLabel('tone', v, 'en')).join(', ')}` : variables.tone ? `- Tone: ${getVariableLabel('tone', variables.tone, 'en')}` : ''}
-${Array.isArray(variables.writingStyle) ? `- Writing Style: ${variables.writingStyle.map(v => getVariableLabel('writingStyle', v, 'en')).join(', ')}` : variables.writingStyle ? `- Writing Style: ${getVariableLabel('writingStyle', variables.writingStyle, 'en')}` : ''}
-${Array.isArray(variables.perspective) ? `- Perspective: ${variables.perspective.map(v => getVariableLabel('perspective', v, 'en')).join(', ')}` : variables.perspective ? `- Perspective: ${getVariableLabel('perspective', variables.perspective, 'en')}` : ''}
-${Array.isArray(variables.emotionalAppeal) ? `- Emotion: ${variables.emotionalAppeal.map(v => getVariableLabel('emotionalAppeal', v, 'en')).join(', ')}` : variables.emotionalAppeal ? `- Emotion: ${getVariableLabel('emotionalAppeal', variables.emotionalAppeal, 'en')}` : ''}
-${Array.isArray(variables.paces) ? `- Paces: ${variables.paces.map(v => getVariableLabel('paces', v, 'en')).join(', ')}` : variables.paces ? `- Paces: ${getVariableLabel('paces', variables.paces, 'en')}` : ''}
-${Array.isArray(variables.valueProposition) ? `- Value Prop: ${variables.valueProposition.map(v => getVariableLabel('valueProposition', v, 'en')).join(', ')}` : variables.valueProposition ? `- Value Prop: ${getVariableLabel('valueProposition', variables.valueProposition, 'en')}` : ''}
+${Array.isArray(variables_clean.tone) ? `- Tone: ${variables_clean.tone.map(v => getVariableLabel('tone', v, 'en')).join(', ')}` : variables_clean.tone ? `- Tone: ${getVariableLabel('tone', variables_clean.tone, 'en')}` : ''}
+${Array.isArray(variables_clean.writingStyle) ? `- Writing Style: ${variables_clean.writingStyle.map(v => getVariableLabel('writingStyle', v, 'en')).join(', ')}` : variables_clean.writingStyle ? `- Writing Style: ${getVariableLabel('writingStyle', variables_clean.writingStyle, 'en')}` : ''}
+${Array.isArray(variables_clean.perspective) ? `- Perspective: ${variables_clean.perspective.map(v => getVariableLabel('perspective', v, 'en')).join(', ')}` : variables_clean.perspective ? `- Perspective: ${getVariableLabel('perspective', variables_clean.perspective, 'en')}` : ''}
+${Array.isArray(variables_clean.emotionalAppeal) ? `- Emotion: ${variables_clean.emotionalAppeal.map(v => getVariableLabel('emotionalAppeal', v, 'en')).join(', ')}` : variables_clean.emotionalAppeal ? `- Emotion: ${getVariableLabel('emotionalAppeal', variables_clean.emotionalAppeal, 'en')}` : ''}
+${Array.isArray(variables_clean.paces) ? `- Paces: ${variables_clean.paces.map(v => getVariableLabel('paces', v, 'en')).join(', ')}` : variables_clean.paces ? `- Paces: ${getVariableLabel('paces', variables_clean.paces, 'en')}` : ''}
+${Array.isArray(variables_clean.valueProposition) ? `- Value Prop: ${variables_clean.valueProposition.map(v => getVariableLabel('valueProposition', v, 'en')).join(', ')}` : variables_clean.valueProposition ? `- Value Prop: ${getVariableLabel('valueProposition', variables_clean.valueProposition, 'en')}` : ''}
 
 HOOK STRATEGY:
-${Array.isArray(variables.hookType) ? `- Hook Type: ${variables.hookType.map(v => getVariableLabel('hookType', v, 'en')).join(', ')}` : variables.hookType ? `- Hook Type: ${getVariableLabel('hookType', variables.hookType, 'en')}` : ''}
-${Array.isArray(variables.openingTemplate) ? `- Opening: ${variables.openingTemplate.map(v => getVariableLabel('openingTemplate', v, 'en')).join(', ')}` : variables.openingTemplate ? `- Opening: ${getVariableLabel('openingTemplate', variables.openingTemplate, 'en')}` : ''}
+${Array.isArray(variables_clean.hookType) ? `- Hook Type: ${variables_clean.hookType.map(v => getVariableLabel('hookType', v, 'en')).join(', ')}` : variables_clean.hookType ? `- Hook Type: ${getVariableLabel('hookType', variables_clean.hookType, 'en')}` : ''}
+${Array.isArray(variables_clean.openingTemplate) ? `- Opening: ${variables_clean.openingTemplate.map(v => getVariableLabel('openingTemplate', v, 'en')).join(', ')}` : variables_clean.openingTemplate ? `- Opening: ${getVariableLabel('openingTemplate', variables_clean.openingTemplate, 'en')}` : ''}
 
 CONTENT ANGLE:
-${Array.isArray(variables.contentFramework) ? `- Framework: ${variables.contentFramework.map(v => getVariableLabel('contentFramework', v, 'en')).join(', ')}` : variables.contentFramework ? `- Framework: ${getVariableLabel('contentFramework', variables.contentFramework, 'en')}` : ''}
-${Array.isArray(variables.targetAudience) ? `- Audience: ${variables.targetAudience.map(v => getVariableLabel('targetAudience', v, 'en')).join(', ')}` : variables.targetAudience ? `- Audience: ${getVariableLabel('targetAudience', variables.targetAudience, 'en')}` : ''}
+${Array.isArray(variables_clean.contentFramework) ? `- Framework: ${variables_clean.contentFramework.map(v => getVariableLabel('contentFramework', v, 'en')).join(', ')}` : variables_clean.contentFramework ? `- Framework: ${getVariableLabel('contentFramework', variables_clean.contentFramework, 'en')}` : ''}
+${Array.isArray(variables_clean.targetAudience) ? `- Audience: ${variables_clean.targetAudience.map(v => getVariableLabel('targetAudience', v, 'en')).join(', ')}` : variables_clean.targetAudience ? `- Audience: ${getVariableLabel('targetAudience', variables_clean.targetAudience, 'en')}` : ''}
 
 STRUCTURE & FORMAT:
-${variables.captionLength ? `- Length: ${Array.isArray(variables.captionLength) ? variables.captionLength.map(v => getVariableLabel('captionLength', v, 'en')).join(', ') : getVariableLabel('captionLength', variables.captionLength, 'en')}` : ''}
-${variables.emojiStyle ? `- Emoji: ${Array.isArray(variables.emojiStyle) ? variables.emojiStyle.map(v => getVariableLabel('emojiStyle', v, 'en')).join(', ') : getVariableLabel('emojiStyle', variables.emojiStyle, 'en')}` : ''}
-${Array.isArray(variables.paragraphStructure) ? `- Paragraphs: ${variables.paragraphStructure.map(v => getVariableLabel('paragraphStructure', v, 'en')).join(', ')}` : variables.paragraphStructure ? `- Paragraphs: ${getVariableLabel('paragraphStructure', variables.paragraphStructure, 'en')}` : ''}
+${variables_clean.captionLength ? `- Length: ${Array.isArray(variables_clean.captionLength) ? variables_clean.captionLength.map(v => getVariableLabel('captionLength', v, 'en')).join(', ') : getVariableLabel('captionLength', variables_clean.captionLength, 'en')}` : ''}
+${variables_clean.emojiStyle ? `- Emoji: ${Array.isArray(variables_clean.emojiStyle) ? variables_clean.emojiStyle.map(v => getVariableLabel('emojiStyle', v, 'en')).join(', ') : getVariableLabel('emojiStyle', variables_clean.emojiStyle, 'en')}` : ''}
+${Array.isArray(variables_clean.paragraphStructure) ? `- Paragraphs: ${variables_clean.paragraphStructure.map(v => getVariableLabel('paragraphStructure', v, 'en')).join(', ')}` : variables_clean.paragraphStructure ? `- Paragraphs: ${getVariableLabel('paragraphStructure', variables_clean.paragraphStructure, 'en')}` : ''}
 
 CALL TO ACTION:
-${Array.isArray(variables.ctaTone) ? `- CTA Tone: ${variables.ctaTone.map(v => getVariableLabel('ctaTone', v, 'en')).join(', ')}` : variables.ctaTone ? `- CTA Tone: ${getVariableLabel('ctaTone', variables.ctaTone, 'en')}` : ''}
+${Array.isArray(variables_clean.ctaTone) ? `- CTA Tone: ${variables_clean.ctaTone.map(v => getVariableLabel('ctaTone', v, 'en')).join(', ')}` : variables_clean.ctaTone ? `- CTA Tone: ${getVariableLabel('ctaTone', variables_clean.ctaTone, 'en')}` : ''}
 
 TIMING & TRENDS:
-${Array.isArray(variables.timeliness) ? `- Timeliness: ${variables.timeliness.map(v => getVariableLabel('timeliness', v, 'en')).join(', ')}` : variables.timeliness ? `- Timeliness: ${getVariableLabel('timeliness', variables.timeliness, 'en')}` : ''}
-${Array.isArray(variables.trendElements) ? `- Trends: ${variables.trendElements.map(v => getVariableLabel('trendElements', v, 'en')).join(', ')}` : variables.trendElements ? `- Trends: ${getVariableLabel('trendElements', variables.trendElements, 'en')}` : ''}
+${Array.isArray(variables_clean.timeliness) ? `- Timeliness: ${variables_clean.timeliness.map(v => getVariableLabel('timeliness', v, 'en')).join(', ')}` : variables_clean.timeliness ? `- Timeliness: ${getVariableLabel('timeliness', variables_clean.timeliness, 'en')}` : ''}
+${Array.isArray(variables_clean.trendElements) ? `- Trends: ${variables_clean.trendElements.map(v => getVariableLabel('trendElements', v, 'en')).join(', ')}` : variables_clean.trendElements ? `- Trends: ${getVariableLabel('trendElements', variables_clean.trendElements, 'en')}` : ''}
 
 Generate 8-15 relevant hashtags that mix popular and niche tags for optimal reach.
 
@@ -213,8 +239,21 @@ OUTPUT FORMAT (JSON only, no markdown):
 export function buildXiaohongshuPrompt(
     keywords: string[],
     variables: VariableSelections,
-    topic?: string
+    topic?: string,
+    disabledDimensions: string[] = []
 ): string {
+    // Filter out disabled dimensions from variables
+    const filteredVariables: VariableSelections = {};
+    for (const [key, value] of Object.entries(variables)) {
+        // Skip disabled dimensions
+        if (disabledDimensions.includes(key)) continue;
+        // Skip undefined/null/empty values
+        if (value === undefined || value === null || value === '') continue;
+        // Skip arrays that are empty
+        if (Array.isArray(value) && value.length === 0) continue;
+        filteredVariables[key as keyof VariableSelections] = value;
+    }
+    const variables_clean = filteredVariables;
     return `${DIGIPARK_SYSTEM_PROMPT}
 
 PLATFORM: Xiaohongshu (Little Red Book) (Lifestyle, Authentic, Helpful, Emoji-rich)
@@ -226,32 +265,32 @@ CONTEXT & KEYWORDS:
 ${topic ? `- Topic Direction: ${topic}` : ''}
 
 STYLE & TONE:
-${Array.isArray(variables.tone) ? `- Tone: ${variables.tone.map(v => getVariableLabel('tone', v, 'en')).join(', ')}` : variables.tone ? `- Tone: ${getVariableLabel('tone', variables.tone, 'en')}` : ''}
-${Array.isArray(variables.writingStyle) ? `- Writing Style: ${variables.writingStyle.map(v => getVariableLabel('writingStyle', v, 'en')).join(', ')}` : variables.writingStyle ? `- Writing Style: ${getVariableLabel('writingStyle', variables.writingStyle, 'en')}` : ''}
-${Array.isArray(variables.perspective) ? `- Perspective: ${variables.perspective.map(v => getVariableLabel('perspective', v, 'en')).join(', ')}` : variables.perspective ? `- Perspective: ${getVariableLabel('perspective', variables.perspective, 'en')}` : ''}
-${Array.isArray(variables.emotionalAppeal) ? `- Emotional Appeal: ${variables.emotionalAppeal.map(v => getVariableLabel('emotionalAppeal', v, 'en')).join(', ')}` : variables.emotionalAppeal ? `- Emotional Appeal: ${getVariableLabel('emotionalAppeal', variables.emotionalAppeal, 'en')}` : ''}
-${Array.isArray(variables.paces) ? `- Pacing: ${variables.paces.map(v => getVariableLabel('paces', v, 'en')).join(', ')}` : variables.paces ? `- Pacing: ${getVariableLabel('paces', variables.paces, 'en')}` : ''}
-${Array.isArray(variables.valueProposition) ? `- Value Prop: ${variables.valueProposition.map(v => getVariableLabel('valueProposition', v, 'en')).join(', ')}` : variables.valueProposition ? `- Value Prop: ${getVariableLabel('valueProposition', variables.valueProposition, 'en')}` : ''}
+${Array.isArray(variables_clean.tone) ? `- Tone: ${variables_clean.tone.map(v => getVariableLabel('tone', v, 'en')).join(', ')}` : variables_clean.tone ? `- Tone: ${getVariableLabel('tone', variables_clean.tone, 'en')}` : ''}
+${Array.isArray(variables_clean.writingStyle) ? `- Writing Style: ${variables_clean.writingStyle.map(v => getVariableLabel('writingStyle', v, 'en')).join(', ')}` : variables_clean.writingStyle ? `- Writing Style: ${getVariableLabel('writingStyle', variables_clean.writingStyle, 'en')}` : ''}
+${Array.isArray(variables_clean.perspective) ? `- Perspective: ${variables_clean.perspective.map(v => getVariableLabel('perspective', v, 'en')).join(', ')}` : variables_clean.perspective ? `- Perspective: ${getVariableLabel('perspective', variables_clean.perspective, 'en')}` : ''}
+${Array.isArray(variables_clean.emotionalAppeal) ? `- Emotional Appeal: ${variables_clean.emotionalAppeal.map(v => getVariableLabel('emotionalAppeal', v, 'en')).join(', ')}` : variables_clean.emotionalAppeal ? `- Emotional Appeal: ${getVariableLabel('emotionalAppeal', variables_clean.emotionalAppeal, 'en')}` : ''}
+${Array.isArray(variables_clean.paces) ? `- Pacing: ${variables_clean.paces.map(v => getVariableLabel('paces', v, 'en')).join(', ')}` : variables_clean.paces ? `- Pacing: ${getVariableLabel('paces', variables_clean.paces, 'en')}` : ''}
+${Array.isArray(variables_clean.valueProposition) ? `- Value Prop: ${variables_clean.valueProposition.map(v => getVariableLabel('valueProposition', v, 'en')).join(', ')}` : variables_clean.valueProposition ? `- Value Prop: ${getVariableLabel('valueProposition', variables_clean.valueProposition, 'en')}` : ''}
 
 HOOK STRATEGY:
-${Array.isArray(variables.hookType) ? `- Hook Type: ${variables.hookType.map(v => getVariableLabel('hookType', v, 'en')).join(', ')}` : variables.hookType ? `- Hook Type: ${getVariableLabel('hookType', variables.hookType, 'en')}` : ''}
-${Array.isArray(variables.openingTemplate) ? `- Opener Template: ${variables.openingTemplate.map(v => getVariableLabel('openingTemplate', v, 'en')).join(', ')}` : variables.openingTemplate ? `- Opener Template: ${getVariableLabel('openingTemplate', variables.openingTemplate, 'en')}` : ''}
+${Array.isArray(variables_clean.hookType) ? `- Hook Type: ${variables_clean.hookType.map(v => getVariableLabel('hookType', v, 'en')).join(', ')}` : variables_clean.hookType ? `- Hook Type: ${getVariableLabel('hookType', variables_clean.hookType, 'en')}` : ''}
+${Array.isArray(variables_clean.openingTemplate) ? `- Opener Template: ${variables_clean.openingTemplate.map(v => getVariableLabel('openingTemplate', v, 'en')).join(', ')}` : variables_clean.openingTemplate ? `- Opener Template: ${getVariableLabel('openingTemplate', variables_clean.openingTemplate, 'en')}` : ''}
 
 CONTENT ANGLE:
-${Array.isArray(variables.contentFramework) ? `- Framework: ${variables.contentFramework.map(v => getVariableLabel('contentFramework', v, 'en')).join(', ')}` : variables.contentFramework ? `- Framework: ${getVariableLabel('contentFramework', variables.contentFramework, 'en')}` : ''}
-${Array.isArray(variables.targetAudience) ? `- Target Audience: ${variables.targetAudience.map(v => getVariableLabel('targetAudience', v, 'en')).join(', ')}` : variables.targetAudience ? `- Target Audience: ${getVariableLabel('targetAudience', variables.targetAudience, 'en')}` : ''}
+${Array.isArray(variables_clean.contentFramework) ? `- Framework: ${variables_clean.contentFramework.map(v => getVariableLabel('contentFramework', v, 'en')).join(', ')}` : variables_clean.contentFramework ? `- Framework: ${getVariableLabel('contentFramework', variables_clean.contentFramework, 'en')}` : ''}
+${Array.isArray(variables_clean.targetAudience) ? `- Target Audience: ${variables_clean.targetAudience.map(v => getVariableLabel('targetAudience', v, 'en')).join(', ')}` : variables_clean.targetAudience ? `- Target Audience: ${getVariableLabel('targetAudience', variables_clean.targetAudience, 'en')}` : ''}
 
 STRUCTURE & FORMAT:
-${variables.captionLength ? `- Length: ${Array.isArray(variables.captionLength) ? variables.captionLength.map(v => getVariableLabel('captionLength', v, 'en')).join(', ') : getVariableLabel('captionLength', variables.captionLength, 'en')}` : ''}
-${variables.emojiStyle ? `- Emoji Style: ${Array.isArray(variables.emojiStyle) ? variables.emojiStyle.map(v => getVariableLabel('emojiStyle', v, 'en')).join(', ') : getVariableLabel('emojiStyle', variables.emojiStyle, 'en')}` : ''}
-${Array.isArray(variables.paragraphStructure) ? `- Structure: ${variables.paragraphStructure.map(v => getVariableLabel('paragraphStructure', v, 'en')).join(', ')}` : variables.paragraphStructure ? `- Structure: ${getVariableLabel('paragraphStructure', variables.paragraphStructure, 'en')}` : ''}
+${variables_clean.captionLength ? `- Length: ${Array.isArray(variables_clean.captionLength) ? variables_clean.captionLength.map(v => getVariableLabel('captionLength', v, 'en')).join(', ') : getVariableLabel('captionLength', variables_clean.captionLength, 'en')}` : ''}
+${variables_clean.emojiStyle ? `- Emoji Style: ${Array.isArray(variables_clean.emojiStyle) ? variables_clean.emojiStyle.map(v => getVariableLabel('emojiStyle', v, 'en')).join(', ') : getVariableLabel('emojiStyle', variables_clean.emojiStyle, 'en')}` : ''}
+${Array.isArray(variables_clean.paragraphStructure) ? `- Structure: ${variables_clean.paragraphStructure.map(v => getVariableLabel('paragraphStructure', v, 'en')).join(', ')}` : variables_clean.paragraphStructure ? `- Structure: ${getVariableLabel('paragraphStructure', variables_clean.paragraphStructure, 'en')}` : ''}
 
 CALL TO ACTION:
-${Array.isArray(variables.ctaTone) ? `- CTA Tone: ${variables.ctaTone.map(v => getVariableLabel('ctaTone', v, 'en')).join(', ')}` : variables.ctaTone ? `- CTA Tone: ${getVariableLabel('ctaTone', variables.ctaTone, 'en')}` : ''}
+${Array.isArray(variables_clean.ctaTone) ? `- CTA Tone: ${variables_clean.ctaTone.map(v => getVariableLabel('ctaTone', v, 'en')).join(', ')}` : variables_clean.ctaTone ? `- CTA Tone: ${getVariableLabel('ctaTone', variables_clean.ctaTone, 'en')}` : ''}
 
 TIMING & TRENDS:
-${Array.isArray(variables.timeliness) ? `- Timeliness: ${variables.timeliness.map(v => getVariableLabel('timeliness', v, 'en')).join(', ')}` : variables.timeliness ? `- Timeliness: ${getVariableLabel('timeliness', variables.timeliness, 'en')}` : ''}
-${Array.isArray(variables.trendElements) ? `- Trends: ${variables.trendElements.map(v => getVariableLabel('trendElements', v, 'en')).join(', ')}` : variables.trendElements ? `- Trends: ${getVariableLabel('trendElements', variables.trendElements, 'en')}` : ''}
+${Array.isArray(variables_clean.timeliness) ? `- Timeliness: ${variables_clean.timeliness.map(v => getVariableLabel('timeliness', v, 'en')).join(', ')}` : variables_clean.timeliness ? `- Timeliness: ${getVariableLabel('timeliness', variables_clean.timeliness, 'en')}` : ''}
+${Array.isArray(variables_clean.trendElements) ? `- Trends: ${variables_clean.trendElements.map(v => getVariableLabel('trendElements', v, 'en')).join(', ')}` : variables_clean.trendElements ? `- Trends: ${getVariableLabel('trendElements', variables_clean.trendElements, 'en')}` : ''}
 
 INSTRUCTIONS:
 Generate 5-10 relevant hashtags, mixing trending tags and vertical tags.
@@ -284,13 +323,13 @@ async function generateSingleCaption(
     let prompt: string;
     switch (platform) {
         case 'tiktok':
-            prompt = buildTikTokPrompt(keywords, variables, topic);
+            prompt = buildTikTokPrompt(keywords, variables, topic, disabledDimensions);
             break;
         case 'instagram':
-            prompt = buildInstagramPrompt(keywords, variables, topic);
+            prompt = buildInstagramPrompt(keywords, variables, topic, disabledDimensions);
             break;
         case 'xiaohongshu':
-            prompt = buildXiaohongshuPrompt(keywords, variables, topic);
+            prompt = buildXiaohongshuPrompt(keywords, variables, topic, disabledDimensions);
             break;
     }
 
